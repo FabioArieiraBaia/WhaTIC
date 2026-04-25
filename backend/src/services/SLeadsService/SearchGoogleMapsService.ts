@@ -12,8 +12,8 @@ interface SLeadsRequest {
 
 const regexFallbackExtract = (text: string): { name: string; number: string }[] => {
     console.log("Starting Regex Fallback extraction...");
-    // Regex for BR phone numbers (with or without 55, with or without mask)
-    const phoneRegex = /(?:\+?55\s?)?\(?\d{2}\)?\s?9?\d{4}[-\s]?\d{4}/g;
+    // Broader regex for international phone numbers
+    const phoneRegex = /(?:\+|00)?(?:[1-9]\d{0,3}[\s-]?)?\(?\d{2,3}\)?[\s-]?\d{3,5}[\s-]?\d{3,5}/g;
     const lines = text.split("\n");
     const results = [];
     const seenNumbers = new Set();
@@ -25,17 +25,21 @@ const regexFallbackExtract = (text: string): { name: string; number: string }[] 
         if (matches) {
             for (const match of matches) {
                 let cleanNumber = match.replace(/\D/g, "");
-                if (cleanNumber.length === 11) cleanNumber = "55" + cleanNumber;
-                if (cleanNumber.length === 10) cleanNumber = "55" + cleanNumber.substring(0, 2) + "9" + cleanNumber.substring(2);
+                
+                // Skip very short or very long strings that might be misinterpreted
+                if (cleanNumber.length < 8 || cleanNumber.length > 15) continue;
+
+                // Basic BR formatting logic
+                if (cleanNumber.length === 11 && cleanNumber.startsWith("9")) cleanNumber = "55" + cleanNumber;
+                else if (cleanNumber.length === 10) cleanNumber = "55" + cleanNumber.substring(0, 2) + "9" + cleanNumber.substring(2);
+                else if (cleanNumber.length === 9 && cleanNumber.startsWith("9")) cleanNumber = "351" + cleanNumber; // Likely Portugal
 
                 if (!seenNumbers.has(cleanNumber)) {
-                    // Try to find a name: usually 2-5 lines above the phone number in Google Maps results
                     let name = "Lead Coletado";
                     for (let j = 1; j <= 5; j++) {
                         if (i - j >= 0) {
                             const prevLine = lines[i - j].trim();
-                            // If it doesn't look like a rating (e.g. "4.5 (120)") or category, it might be the name
-                            if (prevLine && !prevLine.match(/^\d\.\d/) && prevLine.length > 3 && prevLine.length < 50) {
+                            if (prevLine && !prevLine.match(/^\d\.\d/) && prevLine.length > 3 && prevLine.length < 60) {
                                 name = prevLine;
                                 break;
                             }
@@ -56,30 +60,51 @@ const SearchGoogleMapsService = async ({ query, companyId }: SLeadsRequest): Pro
   let browser;
   try {
     // 1. Scrape Google Maps
-    browser = await puppeteer.launch({ headless: true, args: ["--no-sandbox", "--disable-setuid-sandbox"] });
+    browser = await puppeteer.launch({ 
+        headless: true, 
+        args: ["--no-sandbox", "--disable-setuid-sandbox", "--window-size=1920,1080"] 
+    });
     const page = await browser.newPage();
+    await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+    await page.setViewport({ width: 1920, height: 1080 });
     
     // Construct search URL
     const searchUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
-    await page.goto(searchUrl, { waitUntil: "networkidle2" });
+    await page.goto(searchUrl, { waitUntil: "networkidle2", timeout: 60000 });
 
-    // Wait for the results pane to load
-    await page.waitForSelector('[role="feed"]', { timeout: 10000 }).catch(() => console.log("Feed not found quickly"));
+    // Wait for the results pane to load - trying multiple possible selectors
+    const feedSelector = '[role="feed"], .m67qEc, [aria-label*="Resultados"]';
+    await page.waitForSelector(feedSelector, { timeout: 20000 }).catch(() => console.log("Feed selector not found, trying fallback extraction."));
 
-    // Scroll down a few times to load some results (simplified version)
-    for (let i = 0; i < 3; i++) {
-        await page.evaluate(() => {
-            const feed = document.querySelector('[role="feed"]');
-            if (feed) feed.scrollBy(0, 1000);
-        });
+    // Scroll down more times to load a significant number of results
+    let lastHeight = await page.evaluate((sel) => {
+        const feed = document.querySelector(sel);
+        return feed ? feed.scrollHeight : 0;
+    }, feedSelector);
+
+    for (let i = 0; i < 20; i++) {
+        await page.evaluate((sel) => {
+            const feed = document.querySelector(sel);
+            if (feed) feed.scrollBy(0, 10000);
+            else window.scrollBy(0, 10000);
+        }, feedSelector);
+        
         await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        let newHeight = await page.evaluate((sel) => {
+            const feed = document.querySelector(sel);
+            return feed ? feed.scrollHeight : 0;
+        }, feedSelector);
+        
+        if (newHeight === lastHeight && i > 8) break; 
+        lastHeight = newHeight;
     }
 
     // Extract text from the results pane
-    const rawData = await page.evaluate(() => {
-        const feed = document.querySelector('[role="feed"]') as any;
+    const rawData = await page.evaluate((sel) => {
+        const feed = document.querySelector(sel) as any;
         return feed ? feed.innerText : document.body.innerText;
-    });
+    }, feedSelector);
 
     console.log(`SLeads: Scraped ${rawData.length} characters from Maps.`);
 
@@ -131,21 +156,24 @@ const SearchGoogleMapsService = async ({ query, companyId }: SLeadsRequest): Pro
     const model = genAI.getGenerativeModel({ model: aiAgentModel });
 
     const prompt = `
-Você é um especialista em extração de dados. O texto abaixo foi copiado de uma pesquisa no Google Maps por "${query}".
-Seu objetivo é extrair o NOME da empresa e o NÚMERO DE TELEFONE (potencial WhatsApp).
+Você é um especialista em extração de dados e inteligência comercial. O texto abaixo foi extraído de uma pesquisa extensa no Google Maps por "${query}".
+Seu objetivo é ser EXAUSTIVO e extrair TODOS os nomes de empresas/profissionais e seus respectivos números de TELEFONE ou WHATSAPP encontrados.
+
 Retorne os dados EXCLUSIVAMENTE em formato JSON, como uma lista de objetos com as chaves "name" e "number".
 Exemplo de saída:
 [
   {"name": "Empresa A", "number": "5511999999999"},
   {"name": "Corretor B", "number": "5511888888888"}
 ]
-Regras:
-1. O número deve conter apenas dígitos (sem traços, parênteses ou espaços).
-2. Tente incluir o código do país (55 para Brasil) e DDD, se inferível.
-3. Se não encontrar nenhum telefone válido, retorne [].
-4. NÃO inclua nenhum texto adicional além do JSON. Nada de crases ou explicações.
 
-TEXTO BRUTO:
+Regras Cruciais:
+1. Extraia o máximo de leads possível. Não pule nenhum.
+2. O campo "number" deve conter apenas dígitos (Ex: 5511999999999). 
+3. Se o número não tiver o código do país, assuma Brasil (55) e o DDD da região se possível.
+4. Nomes devem ser limpos e profissionais.
+5. NÃO responda com nada além do JSON. Sem explicações ou blocos de código markdown.
+
+TEXTO EXTRAÍDO (Pode conter muitos dados):
 ${rawData}
 `;
 

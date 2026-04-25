@@ -5,41 +5,38 @@
 
 WhaTIC is a powerful multi-channel communication platform with CRM and helpdesk features, specifically designed to leverage WhatsApp and Artificial Intelligence for enhanced customer engagement.
 
-## Key Features
+## 🚀 Key Features
 
 - **Multi-channel Support:** Connect multiple WhatsApp accounts and manage all chats in one place.
-- **AI Agent Integration:** Built-in support for Google Gemini AI to automate customer service with natural language.
-- **Product Catalog:** Manage and share your product catalog directly within the chat.
+- **AI Agent (Gemini AI):** Native integration with Google Gemini AI for smart automation.
+- **SLeads (Google Maps Scraper):** Extract targeted leads from Google Maps using AI to filter and validate contacts.
+- **AI-Powered Campaigns:** Send bulk messages that are unique and humanized for each recipient.
+- **Contact CRM & History:** Track customer purchases, total spend, and manage service orders (OS).
+- **Product Catalog:** Manage and share your product catalog with promotional price support.
 - **Multi-company (SaaS):** Support for multiple companies in a single installation.
-- **Real-time Notifications:** Instant notifications for new messages and ticket updates.
-- **Dashboard & Analytics:** Monitor your team's performance and customer satisfaction.
 
-## AI Agent (Gemini AI)
+## 🤖 AI Agent (Gemini AI)
 
-WhaTIC includes a native integration with Google Gemini AI. You can configure an AI Agent for each ticket to:
-- Automatically respond to common customer questions.
-- Use a custom prompt and knowledge base to match your business tone and information.
-- Share product details and purchase links automatically from your catalog.
-- Transfer to a human agent when the AI cannot help.
+WhaTIC includes a deep integration with Google Gemini AI. The AI Agent is aware of:
+- **Customer Profile:** Access to name and custom fields.
+- **Purchase History:** Knows what the customer has already bought and how much they've spent.
+- **Service Orders:** Can check the status of open or finished service orders.
+- **Promotional Prices:** Smartly offers discounts when a product has a promotional price.
 
-## Product Management
+## 📍 SLeads
+A powerful tool to generate new business. Search for any niche and location, and let WhaTIC scrape Google Maps, extract valid WhatsApp numbers using AI, and organize them into lists for your campaigns.
 
-The built-in product management system allows you to:
-- Create and manage a digital catalog of products/services.
-- Include descriptions, prices, and direct purchase links.
-- Allow the AI Agent to recommend products based on customer inquiries.
+## 📜 Credits & Authorship
 
-## Original Authorship
+All credits to **Fabio Arieira** ([fabioarieira.com](https://fabioarieira.com)).
 
-This project is a derivative work of [Ticketz](https://github.com/allgood/ticketz), which itself was inspired by the [Whaticket Community](https://github.com/canove/whaticket-community) project. WhaTIC adds advanced features like AI automation and integrated product management.
+This project is a derivative work of [Ticketz](https://github.com/allgood/ticketz), which itself was inspired by the [Whaticket Community](https://github.com/canove/whaticket-community) project. WhaTIC adds advanced features like AI automation, SLeads, and integrated CRM management.
 
-## Licensing
+## ⚖️ Licensing
 
 WhaTIC is licensed under the **AGPL**, which requires that any user who has access to the system can obtain the source code. If you make changes to the code and commercialize it, you must provide the source code to your users.
 
-## Quick Start (Docker)
-
-For local development or quick testing:
+## 🛠️ Quick Start (Docker)
 
 1. Clone the repository:
    ```bash

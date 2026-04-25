@@ -81,9 +81,13 @@ export const GeminiService = async ({
 
   let productsText = "";
   if (products.length > 0) {
-    productsText = products.map(p => 
-      `- ${p.name}: R$ ${p.price} - ${p.description || ""} - Link: ${p.purchaseUrl || "N/A"}`
-    ).join("\n");
+    productsText = products.map(p => {
+      let priceText = `R$ ${p.price}`;
+      if (p.promotionalPrice && parseFloat(p.promotionalPrice.toString()) > 0) {
+        priceText = `DE R$ ${p.price} POR APENAS R$ ${p.promotionalPrice} (OFERTA ESPECIAL)`;
+      }
+      return `- ${p.name}: ${priceText} - ${p.description || ""} - Link de Compra: ${p.purchaseUrl || "N/A"}`;
+    }).join("\n");
   }
 
   const systemPrompt = `
@@ -110,6 +114,7 @@ ${productsText ? productsText : "Nenhum produto disponível no momento."}
 
 Regras:
 - Responda de forma natural e amigável.
+- Sempre verifique se o produto possui PREÇO PROMOCIONAL e priorize informar este valor como uma oferta especial.
 - Quando o cliente perguntar sobre produtos, ofereça do catálogo.
 - Inclua o link de compra quando relevante.
 - Se não souber algo, informe que um atendente humano irá ajudar.

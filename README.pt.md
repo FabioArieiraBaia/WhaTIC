@@ -1,45 +1,42 @@
-[![en](https://img.shields.io/badge/lang-en-red.svg)](README.md)
-[![pt-br](https://img.shields.io/badge/lang-pt--br-green.svg)](README.pt.md)
+[![en](https://img.shields.io/badge/lang-en-green.svg)](README.md)
+[![pt-br](https://img.shields.io/badge/lang-pt--br-red.svg)](README.pt.md)
 
 # WhaTIC
 
-O WhaTIC é uma poderosa plataforma de comunicação multicanal com recursos de CRM e helpdesk, projetada especificamente para aproveitar o WhatsApp e a Inteligência Artificial para melhorar o engajamento com os clientes.
+O WhaTIC é uma poderosa plataforma de comunicação multicanal com recursos de CRM e helpdesk, projetada especificamente para aproveitar o WhatsApp e a Inteligência Artificial para melhorar o engajamento com o cliente.
 
-## Principais Recursos
+## 🚀 Principais Recursos
 
-- **Suporte Multicanal:** Conecte várias contas de WhatsApp e gerencie todas as conversas em um só lugar.
-- **Integração com Agente de IA:** Suporte nativo ao Google Gemini AI para automatizar o atendimento com linguagem natural.
-- **Catálogo de Produtos:** Gerencie e compartilhe seu catálogo de produtos diretamente no chat.
-- **Multitenancy (SaaS):** Suporte para múltiplas empresas em uma única instalação.
-- **Notificações em Tempo Real:** Avisos instantâneos de novas mensagens e atualizações de tickets.
-- **Dashboard e Relatórios:** Monitore o desempenho da sua equipe e a satisfação dos clientes.
+- **Suporte Multicanal:** Conecte várias contas do WhatsApp e gerencie todos os chats em um só lugar.
+- **Agente de IA (Gemini AI):** Integração nativa com o Google Gemini AI para automação inteligente.
+- **SLeads (Scraper do Google Maps):** Extraia leads segmentados do Google Maps usando IA para filtrar e validar contatos.
+- **Campanhas com IA:** Envie mensagens em massa únicas e humanizadas para cada destinatário.
+- **CRM de Contatos:** Acompanhe o histórico de compras, total gasto e gerencie Ordens de Serviço (OS).
+- **Catálogo de Produtos:** Gerencie e compartilhe seu catálogo com suporte a preços promocionais.
+- **Multi-empresa (SaaS):** Suporte para várias empresas em uma única instalação.
 
-## Agente de IA (Gemini AI)
+## 🤖 Agente de IA (Gemini AI)
 
-O WhaTIC inclui uma integração nativa com o Google Gemini AI. Você pode configurar um Agente de IA para cada ticket para:
-- Responder automaticamente a perguntas frequentes dos clientes.
-- Usar um prompt personalizado e base de conhecimento específica para o seu negócio.
-- Compartilhar detalhes de produtos e links de compra automaticamente a partir do seu catálogo.
-- Transferir para um atendente humano quando a IA não puder ajudar.
+O WhaTIC inclui uma integração profunda com o Google Gemini AI. O Agente de IA tem consciência de:
+- **Perfil do Cliente:** Acesso ao nome e campos personalizados.
+- **Histórico de Compras:** Sabe o que o cliente já comprou e quanto ele já gastou.
+- **Ordens de Serviço:** Pode verificar o status de OS abertas ou finalizadas.
+- **Preços Promocionais:** Oferece descontos de forma inteligente quando um produto tem preço promocional.
 
-## Gestão de Produtos
+## 📍 SLeads
+Uma ferramenta poderosa para gerar novos negócios. Busque por qualquer nicho e localização, e deixe o WhaTIC extrair dados do Google Maps, identificar números de WhatsApp válidos via IA e organizá-los em listas para suas campanhas.
 
-O sistema integrado de gestão de produtos permite que você:
-- Crie e gerencie um catálogo digital de produtos/serviços.
-- Inclua descrições, preços e links diretos para compra.
-- Permita que o Agente de IA recomende produtos com base nas dúvidas do cliente.
+## 📜 Créditos e Autoria
 
-## Autoria Original
+Todos os créditos a **Fabio Arieira** ([fabioarieira.com](https://fabioarieira.com)).
 
-Este projeto é um trabalho derivado do [Ticketz](https://github.com/allgood/ticketz), que por sua vez foi inspirado no projeto [Whaticket Community](https://github.com/canove/whaticket-community). O WhaTIC adiciona funcionalidades avançadas como automação por IA e gestão integrada de produtos.
+Este projeto é um trabalho derivado do [Ticketz](https://github.com/allgood/ticketz), que por sua vez foi inspirado no projeto [Whaticket Community](https://github.com/canove/whaticket-community). O WhaTIC adiciona recursos avançados como automação de IA, SLeads e gestão integrada de CRM.
 
-## Licenciamento
+## ⚖️ Licenciamento
 
 O WhaTIC está licenciado sob a **AGPL**, que exige que qualquer usuário que tenha acesso ao sistema possa obter o código-fonte. Se você fizer alterações no código e comercializá-lo, deverá fornecer o código-fonte aos seus usuários.
 
-## Início Rápido (Docker)
-
-Para desenvolvimento local ou testes rápidos:
+## 🛠️ Início Rápido (Docker)
 
 1. Clone o repositório:
    ```bash
