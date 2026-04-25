@@ -1,42 +1,45 @@
 [![en](https://img.shields.io/badge/lang-en-green.svg)](README.md)
 [![pt-br](https://img.shields.io/badge/lang-pt--br-red.svg)](README.pt.md)
 
-# WhaTIC
+# WhaTIC (v2026 Edition)
 
-WhaTIC is a powerful multi-channel communication platform with CRM and helpdesk features, specifically designed to leverage WhatsApp and Artificial Intelligence for enhanced customer engagement.
+WhaTIC is a cutting-edge multi-channel communication platform and AI-driven CRM. Designed for the high-performance marketing era, it leverages **Gemini 2.0/Flash Multi-modal AI** to provide an absolute humanized experience through text, vision, and hearing.
 
 ## 🚀 Key Features
 
-- **Multi-channel Support:** Connect multiple WhatsApp accounts and manage all chats in one place.
-- **AI Agent (Gemini AI):** Native integration with Google Gemini AI for smart automation.
-- **SLeads (Google Maps Scraper):** Extract targeted leads from Google Maps using AI to filter and validate contacts.
-- **AI-Powered Campaigns:** Send bulk messages that are unique and humanized for each recipient.
-- **Contact CRM & History:** Track customer purchases, total spend, and manage service orders (OS).
-- **Product Catalog:** Manage and share your product catalog with promotional price support.
-- **Multi-company (SaaS):** Support for multiple companies in a single installation.
+- **Multi-modal AI (Gemini 2.0):** The agent can now **see** images and **hear** audio messages, responding naturally to attachments.
+- **Premium Product Catalog:** Manage high-converting assets including product videos, customer testimonials, and upsell suggestions.
+- **Automated Social Proof:** The AI agent intelligently shares real customer audios and screenshots (prints) during conversations to build trust and close sales.
+- **Financial Dashboard (Business Intel):** Track your revenue by week, month, and year. Identify your most valuable customers through the Top Client Ranking.
+- **Smart Service Orders (OS):** Integrated OS management that automatically syncs with customer billing and financial history upon completion.
+- **SLeads (Google Maps Scraper):** AI-powered lead extraction and validation directly from Google Maps.
+- **Modern UI (2026 Trend):** Premium design featuring Glassmorphism, high-contrast themes, and ultra-smooth animations.
 
-## 🤖 AI Agent (Gemini AI)
+## 🤖 Multi-modal AI Agent
+WhaTIC's AI isn't just a chatbot; it's a complete sales partner:
+- **Vision:** Send a photo of a product, and the AI will identify it and provide details.
+- **Hearing:** Send a voice note, and the AI will listen and reply accordingly.
+- **Proof Delivery:** The AI can "decide" the best moment to send a real customer testimonial (audio or image) to a lead.
+- **Financial Awareness:** Knows the customer's lifetime value and open orders to personalize the treatment.
 
-WhaTIC includes a deep integration with Google Gemini AI. The AI Agent is aware of:
-- **Customer Profile:** Access to name and custom fields.
-- **Purchase History:** Knows what the customer has already bought and how much they've spent.
-- **Service Orders:** Can check the status of open or finished service orders.
-- **Promotional Prices:** Smartly offers discounts when a product has a promotional price.
+## 📈 Business Management
+- **Gestão Financeira:** A dedicated module to monitor the financial health of your business, focusing on real sales and services.
+- **Customer Ranking:** Automatically identifies your "Whales" (top-spending clients) for priority support or VIP offers.
 
 ## 📍 SLeads
-A powerful tool to generate new business. Search for any niche and location, and let WhaTIC scrape Google Maps, extract valid WhatsApp numbers using AI, and organize them into lists for your campaigns.
+Generate qualified leads in seconds. Search by niche and location, and the system handles the rest: extraction, AI filtering, and campaign integration.
 
 ## 📜 Credits & Authorship
 
 All credits to **Fabio Arieira** ([fabioarieira.com](https://fabioarieira.com)).
 
-This project is a derivative work of [Ticketz](https://github.com/allgood/ticketz), which itself was inspired by the [Whaticket Community](https://github.com/canove/whaticket-community) project. WhaTIC adds advanced features like AI automation, SLeads, and integrated CRM management.
+WhaTIC is a specialized evolution of the communication ecosystem, adding unprecedented AI intelligence and business management layers.
 
 ## ⚖️ Licensing
 
-WhaTIC is licensed under the **AGPL**, which requires that any user who has access to the system can obtain the source code. If you make changes to the code and commercialize it, you must provide the source code to your users.
+WhaTIC is licensed under the **AGPL**. You are free to use and modify, but any derivative work must remain open-source and provide the source code to its users.
 
-## 🛠️ Quick Start (Docker)
+## 🛠️ Quick Start
 
 1. Clone the repository:
    ```bash
@@ -49,9 +52,9 @@ WhaTIC is licensed under the **AGPL**, which requires that any user who has acce
    docker compose -f docker-compose-local.yaml up -d
    ```
 
-The application will be available at `http://localhost:3000`.
+Application: `http://localhost:3000`
 Default login: `admin@ticketz.host` / `123456`.
 
 ---
 
-**Important Notice:** This project is not affiliated with Meta, WhatsApp, or Google. Use it responsibly.
+**Disclaimer:** This project is not affiliated with Meta, WhatsApp, or Google. Use it responsibly and respect platform terms of service.
