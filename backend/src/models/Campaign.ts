@@ -8,12 +8,16 @@ import {
   AutoIncrement,
   ForeignKey,
   BelongsTo,
-  HasMany
+  HasMany,
+  DataType,
+  BelongsToMany
 } from "sequelize-typescript";
 import CampaignShipping from "./CampaignShipping";
 import Company from "./Company";
 import ContactList from "./ContactList";
 import Whatsapp from "./Whatsapp";
+import Product from "./Product";
+import CampaignProduct from "./CampaignProduct";
 
 @Table({ tableName: "Campaigns" })
 class Campaign extends Model<Campaign> {
@@ -100,8 +104,17 @@ class Campaign extends Model<Campaign> {
   @BelongsTo(() => Whatsapp)
   whatsapp: Whatsapp;
 
+  @Column({ defaultValue: false })
+  useAi: boolean;
+
+  @Column(DataType.TEXT)
+  aiPrompt: string;
+
   @HasMany(() => CampaignShipping)
   shipping: CampaignShipping[];
+
+  @BelongsToMany(() => Product, () => CampaignProduct)
+  products: Product[];
 }
 
 export default Campaign;

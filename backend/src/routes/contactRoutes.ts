@@ -6,6 +6,8 @@ import uploadConfig from "../config/upload";
 
 import * as ContactController from "../controllers/ContactController";
 import * as ImportPhoneContactsController from "../controllers/ImportPhoneContactsController";
+import * as ContactPurchaseController from "../controllers/ContactPurchaseController";
+import * as ServiceOrderController from "../controllers/ServiceOrderController";
 import apiTokenAuth from "../middleware/apiTokenAuth";
 
 const contactRoutes = express.Router();
@@ -85,5 +87,16 @@ contactRoutes.delete(
   isAuth,
   ContactController.removeTag
 );
+
+// Purchases
+contactRoutes.get("/contacts/:contactId/purchases", isAuth, ContactPurchaseController.index);
+contactRoutes.post("/contacts/purchases", isAuth, ContactPurchaseController.store);
+contactRoutes.delete("/contacts/purchases/:id", isAuth, ContactPurchaseController.remove);
+
+// Service Orders
+contactRoutes.get("/contacts/:contactId/service-orders", isAuth, ServiceOrderController.index);
+contactRoutes.post("/contacts/service-orders", isAuth, ServiceOrderController.store);
+contactRoutes.put("/contacts/service-orders/:id", isAuth, ServiceOrderController.update);
+contactRoutes.delete("/contacts/service-orders/:id", isAuth, ServiceOrderController.remove);
 
 export default contactRoutes;

@@ -22,6 +22,9 @@ import { generateColor } from "../../helpers/colorGenerator";
 import { getInitials } from "../../helpers/getInitials";
 import { TagsContainer } from "../TagsContainer";
 import useSettings from "../../hooks/useSettings";
+import ContactPurchases from "../ContactPurchases";
+import ContactServiceOrders from "../ContactServiceOrders";
+import { Divider, Tab, Tabs } from "@material-ui/core";
 
 const drawerWidth = 320;
 
@@ -104,6 +107,8 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, ticket, loading }) =>
 	const [modalOpen, setModalOpen] = useState(false);
 	const [openForm, setOpenForm] = useState(false);
   const [showTags, setShowTags] = useState(false);
+  const [tab, setTab] = useState(0);
+  const [totalSpent, setTotalSpent] = useState(0);
 
 	useEffect(() => {
     getSetting("tagsMode").then(res => {
@@ -191,12 +196,31 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, ticket, loading }) =>
               >
                 {i18n.t("contactDrawer.buttons.edit")}
               </Button>
-						<Paper square variant="outlined" className={classes.contactDetails}>
-							<Typography variant="subtitle1" style={{marginBottom: 10}}>
-								{i18n.t("ticketOptionsMenu.appointmentsModal.title")}
-							</Typography>
-							<TicketNotes ticket={ticket} />
-						</Paper>
+              <Paper square variant="outlined" className={classes.contactDetails} style={{ padding: 0 }}>
+                <Tabs
+                  value={tab}
+                  onChange={(e, v) => setTab(v)}
+                  indicatorColor="primary"
+                  textColor="primary"
+                  variant="fullWidth"
+                >
+                  <Tab label="Notas" style={{ minWidth: 'auto' }} />
+                  <Tab label="Compras" style={{ minWidth: 'auto' }} />
+                  <Tab label="OS" style={{ minWidth: 'auto' }} />
+                </Tabs>
+                <Divider />
+                <div style={{ padding: 8 }}>
+                  {tab === 0 && <TicketNotes ticket={ticket} />}
+                  {tab === 1 && <ContactPurchases contactId={contact.id} onTotalUpdate={setTotalSpent} />}
+                  {tab === 2 && <ContactServiceOrders contactId={contact.id} />}
+                </div>
+              </Paper>
+              <div style={{ marginTop: 8, padding: 8, display: 'flex', justifyContent: 'space-between' }}>
+                <Typography variant="subtitle2">Total Gasto:</Typography>
+                <Typography variant="subtitle2" color="primary">
+                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalSpent)}
+                </Typography>
+              </div>
 						<ContactModal
 							open={modalOpen}
 							onClose={() => setModalOpen(false)}

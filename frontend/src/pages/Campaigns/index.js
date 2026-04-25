@@ -306,6 +306,7 @@ const Campaigns = () => {
           </Grid>
         </Grid>
       </MainHeader>
+      
       <Paper
         className={classes.mainPaper}
         variant="outlined"

@@ -399,6 +399,12 @@ const MainListItems = (props) => {
                           </ListItemIcon>
                           <ListItemText primary="Listagem" />
                         </ListItem>
+                        <ListItem onClick={() => history.push("/sleads")} button>
+                          <ListItemIcon>
+                            <PeopleIcon />
+                          </ListItemIcon>
+                          <ListItemText primary="SLeads" />
+                        </ListItem>
                         <ListItem
                           onClick={() => history.push("/contact-lists")}
                           button

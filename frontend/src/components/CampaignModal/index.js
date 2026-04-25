@@ -32,6 +32,9 @@ import {
   Select,
   Tab,
   Tabs,
+  Switch,
+  FormControlLabel,
+  Chip,
 } from "@material-ui/core";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import ConfirmationModal from "../ConfirmationModal";
@@ -105,11 +108,15 @@ const CampaignModal = ({
     whatsappId: "",
     contactListId: "",
     companyId,
+    useAi: false,
+    aiPrompt: "",
+    productIds: [],
   };
 
   const [campaign, setCampaign] = useState(initialState);
   const [whatsapps, setWhatsapps] = useState([]);
   const [contactLists, setContactLists] = useState([]);
+  const [products, setProducts] = useState([]);
   const [messageTab, setMessageTab] = useState(0);
   const [attachment, setAttachment] = useState(null);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
@@ -138,6 +145,10 @@ const CampaignModal = ({
         .get(`/whatsapp`, { params: { companyId, session: 0 } })
         .then(({ data }) => setWhatsapps(data));
 
+      api
+        .get(`/products`, { params: { companyId } })
+        .then(({ data }) => setProducts(data || []));
+
       if (!campaignId) return;
 
       api.get(`/campaigns/${campaignId}`).then(({ data }) => {
@@ -147,6 +158,8 @@ const CampaignModal = ({
           Object.entries(data.campaign).forEach(([key, value]) => {
             if (key === "scheduledAt" && value !== "" && value !== null) {
               prevCampaignData[key] = moment(value).format("YYYY-MM-DDTHH:mm");
+            } else if (key === "products" && value !== null && Array.isArray(value)) {
+              prevCampaignData["productIds"] = value.map(p => p.id);
             } else {
               prevCampaignData[key] = value === null ? "" : value;
             }
@@ -472,8 +485,69 @@ const CampaignModal = ({
                       disabled={!campaignEditable}
                     />
                   </Grid>
-                  <Grid xs={12} item>
-                    <Tabs
+
+                  <Grid xs={12} md={4} item>
+                    <FormControlLabel
+                      control={
+                        <Field
+                          as={Switch}
+                          color="primary"
+                          name="useAi"
+                          checked={values.useAi}
+                          disabled={!campaignEditable}
+                        />
+                      }
+                      label="Disparo com IA"
+                    />
+                  </Grid>
+
+                  {values.useAi && (
+                    <>
+                      <Grid xs={12} item>
+                        <Field
+                          as={TextField}
+                          label="Prompt/Script da IA"
+                          name="aiPrompt"
+                          placeholder="Ex: Aja como um consultor e venda o produto X..."
+                          multiline
+                          rows={4}
+                          fullWidth
+                          variant="outlined"
+                          disabled={!campaignEditable}
+                        />
+                      </Grid>
+                      <Grid xs={12} item>
+                        <FormControl variant="outlined" fullWidth margin="dense">
+                          <InputLabel>Produtos da Campanha</InputLabel>
+                          <Field
+                            as={Select}
+                            multiple
+                            name="productIds"
+                            label="Produtos da Campanha"
+                            renderValue={(selected) => (
+                              <div style={{ display: "flex", flexWrap: "wrap" }}>
+                                {selected.map((value) => {
+                                  const prod = products.find((p) => p.id === value);
+                                  return <Chip key={value} label={prod?.name} style={{ margin: 2 }} />;
+                                })}
+                              </div>
+                            )}
+                            disabled={!campaignEditable}
+                          >
+                            {products.map((prod) => (
+                              <MenuItem key={prod.id} value={prod.id}>
+                                {prod.name}
+                              </MenuItem>
+                            ))}
+                          </Field>
+                        </FormControl>
+                      </Grid>
+                    </>
+                  )}
+
+                  {!values.useAi && (
+                    <Grid xs={12} item>
+                      <Tabs
                       value={messageTab}
                       indicatorColor="primary"
                       textColor="primary"
@@ -590,6 +664,7 @@ const CampaignModal = ({
                       )}
                     </Box>
                   </Grid>
+                  )}
                   {(campaign.mediaPath || attachment) && (
                     <Grid xs={12} item>
                       <Button startIcon={<AttachFileIcon />}>

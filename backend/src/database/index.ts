@@ -42,6 +42,9 @@ import OutOfTicketMessage from "../models/OutOfTicketMessages";
 import Translation from "../models/Translation";
 import Wavoip from "../models/Wavoip";
 import Product from "../models/Product";
+import CampaignProduct from "../models/CampaignProduct";
+import ContactPurchase from "../models/ContactPurchase";
+import ServiceOrder from "../models/ServiceOrder";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const dbConfig = require("../config/database");
@@ -91,7 +94,10 @@ const models = [
   Subscriptions,
   Translation,
   Wavoip,
-  Product
+  Product,
+  CampaignProduct,
+  ContactPurchase,
+  ServiceOrder
 ];
 
 sequelize.addModels(models);

@@ -33,6 +33,7 @@ import ticketzOSSRoutes from "./ticketzOSSRoutes";
 import i18nRoutes from "./i18nRoutes";
 import wavoipRoutes from "./wavoipRoutes";
 import productRoutes from "./productRoutes";
+import sleadsRoutes from "./sleadsRoutes";
 
 const routes = Router();
 
@@ -70,5 +71,6 @@ routes.use(ticketzOSSRoutes);
 routes.use(i18nRoutes);
 routes.use(wavoipRoutes);
 routes.use(productRoutes);
+routes.use(sleadsRoutes);
 
 export default routes;

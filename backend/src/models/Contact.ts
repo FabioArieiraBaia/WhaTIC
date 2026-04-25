@@ -22,6 +22,8 @@ import Schedule from "./Schedule";
 import ContactTag from "./ContactTag";
 import Tag from "./Tag";
 import WhatsappLidMap from "./WhatsappLidMap";
+import ContactPurchase from "./ContactPurchase";
+import ServiceOrder from "./ServiceOrder";
 
 @Table
 class Contact extends Model {
@@ -100,6 +102,12 @@ class Contact extends Model {
 
   @BelongsToMany(() => Tag, () => ContactTag)
   tags: Tag[];
+
+  @HasMany(() => ContactPurchase)
+  purchases: ContactPurchase[];
+
+  @HasMany(() => ServiceOrder)
+  serviceOrders: ServiceOrder[];
 }
 
 export default Contact;

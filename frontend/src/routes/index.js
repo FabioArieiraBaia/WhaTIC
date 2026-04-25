@@ -28,6 +28,7 @@ import Schedules from "../pages/Schedules";
 import Campaigns from "../pages/Campaigns";
 import CampaignsConfig from "../pages/CampaignsConfig";
 import CampaignReport from "../pages/CampaignReport";
+import SLeads from "../pages/Campaigns/SLeads";
 import Annoucements from "../pages/Annoucements";
 import Chat from "../pages/Chat";
 import ToDoList from "../pages/ToDoList/";
@@ -141,6 +142,12 @@ const Routes = () => {
                       exact
                       path="/campaigns"
                       component={Campaigns}
+                      isPrivate
+                    />
+                    <Route
+                      exact
+                      path="/sleads"
+                      component={SLeads}
                       isPrivate
                     />
                     <Route

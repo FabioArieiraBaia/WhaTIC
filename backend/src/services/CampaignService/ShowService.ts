@@ -5,6 +5,7 @@ import CampaignShipping from "../../models/CampaignShipping";
 import ContactList from "../../models/ContactList";
 import ContactListItem from "../../models/ContactListItem";
 import Whatsapp from "../../models/Whatsapp";
+import Product from "../../models/Product";
 
 const ShowService = async (
   id: string | number
@@ -18,7 +19,8 @@ const ShowService = async (
   const campaign = await Campaign.findByPk(id, {
     include: [
       { model: ContactList },
-      { model: Whatsapp, attributes: ["id", "name"] }
+      { model: Whatsapp, attributes: ["id", "name"] },
+      { model: Product, as: "products", attributes: ["id", "name"] }
     ]
   });
 

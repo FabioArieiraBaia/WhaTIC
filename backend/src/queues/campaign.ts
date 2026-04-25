@@ -20,6 +20,8 @@ import { parseToMilliseconds } from "../helpers/parseToMilliseconds";
 import GetWhatsappWbot from "../helpers/GetWhatsappWbot";
 import OutOfTicketMessage from "../models/OutOfTicketMessages";
 import { Session } from "../libs/wbot";
+import Product from "../models/Product";
+import { GenerateCampaignAiMessage } from "../services/CampaignService/GenerateCampaignAiMessage";
 
 const connection = process.env.REDIS_URI || "";
 export const campaignQueue = new Queue("CampaignQueue", connection);
@@ -99,6 +101,10 @@ async function getCampaign(id: number) {
         model: CampaignShipping,
         as: "shipping",
         include: [{ model: ContactListItem, as: "contact" }]
+      },
+      {
+        model: Product,
+        as: "products"
       }
     ]
   });
@@ -254,7 +260,9 @@ async function prepareContact(
   campaignShipping.contactId = contact.id;
   campaignShipping.campaignId = campaign.id;
 
-  if (messages.length) {
+  if (campaign.useAi) {
+    campaignShipping.message = "IA_PENDING";
+  } else if (messages.length) {
     const radomIndex = randomValue(0, messages.length);
     const message = getProcessedMessage(
       messages[radomIndex],
@@ -382,7 +390,11 @@ async function handleDispatchCampaign(job) {
     const { data } = job;
     const { campaignShippingId, campaignId }: DispatchCampaignData = data;
     const campaign = await Campaign.findByPk(campaignId, {
-      include: ["contactList", { model: Whatsapp, as: "whatsapp" }]
+      include: [
+        "contactList", 
+        { model: Whatsapp, as: "whatsapp" },
+        { model: Product, as: "products" }
+      ]
     });
 
     if (!campaign) {
@@ -411,8 +423,22 @@ async function handleDispatchCampaign(job) {
       });
       await campaignShipping.update({ confirmationRequestedAt: moment() });
     } else {
+      let body = campaignShipping.message;
+
+      if (campaign.useAi && (!body || body === "IA_PENDING" || body === "null" || body === "")) {
+        logger.info(`Gerando mensagem via IA para o contato ${campaignShipping.contact.name}`);
+        const aiMessage = await GenerateCampaignAiMessage({
+          campaign,
+          contact: campaignShipping.contact
+        });
+        if (aiMessage) {
+          body = aiMessage;
+          await campaignShipping.update({ message: body });
+        }
+      }
+
       await sendCampaignMessage(campaign.whatsappId, wbot, chatId, {
-        text: campaignShipping.message
+        text: body
       });
       if (campaign.mediaPath) {
         const filePath = path.resolve("public", campaign.mediaPath);

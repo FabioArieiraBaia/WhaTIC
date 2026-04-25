@@ -3,6 +3,7 @@ import AppError from "../../errors/AppError";
 import Campaign from "../../models/Campaign";
 import ContactList from "../../models/ContactList";
 import Whatsapp from "../../models/Whatsapp";
+import Product from "../../models/Product";
 
 interface Data {
   name: string;
@@ -21,6 +22,9 @@ interface Data {
   confirmationMessage3?: string;
   confirmationMessage4?: string;
   confirmationMessage5?: string;
+  useAi?: boolean;
+  aiPrompt?: string;
+  productIds?: number[];
 }
 
 const CreateService = async (data: Data): Promise<Campaign> => {
@@ -44,10 +48,15 @@ const CreateService = async (data: Data): Promise<Campaign> => {
 
   const record = await Campaign.create(data);
 
+  if (data.productIds && data.productIds.length > 0) {
+    await record.$set("products", data.productIds);
+  }
+
   await record.reload({
     include: [
       { model: ContactList },
-      { model: Whatsapp, attributes: ["id", "name"] }
+      { model: Whatsapp, attributes: ["id", "name"] },
+      { model: Product, as: "products" }
     ]
   });
 

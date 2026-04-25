@@ -2,6 +2,8 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
 import Product from "../../models/Product";
 import Message from "../../models/Message";
+import Ticket from "../../models/Ticket";
+import Contact from "../../models/Contact";
 
 interface GeminiServiceProps {
   companyId: number;
@@ -28,6 +30,12 @@ export const GeminiService = async ({
   const genAI = new GoogleGenerativeAI(geminiApiKey);
   const model = genAI.getGenerativeModel({ model: aiAgentModel });
 
+  const ticket = await Ticket.findByPk(ticketId, {
+    include: [{ model: Contact, as: "contact" }]
+  });
+
+  const contactName = ticket?.contact?.name || "Cliente";
+
   // Get ticket messages for context
   const messages = await Message.findAll({
     where: { ticketId, companyId },
@@ -36,7 +44,7 @@ export const GeminiService = async ({
   });
 
   const chatHistory = messages.map(msg => {
-    return `${msg.fromMe ? aiAgentName : "Cliente"}: ${msg.body}`;
+    return `${msg.fromMe ? aiAgentName : contactName}: ${msg.body}`;
   }).join("\n");
 
   // Get active products
@@ -53,6 +61,7 @@ export const GeminiService = async ({
 
   const systemPrompt = `
 Você é ${aiAgentName}, assistente virtual da empresa.
+Você está conversando com ${contactName}.
 
 ${aiAgentPrompt}
 
@@ -76,7 +85,7 @@ ${systemPrompt}
 === Histórico da Conversa ===
 ${chatHistory}
 
-Cliente: ${messageBody}
+${contactName}: ${messageBody}
 ${aiAgentName}:`;
 
   try {

@@ -9,10 +9,16 @@ import {
   ForeignKey,
   BelongsTo,
   DataType,
-  Default
+  Default,
+  BelongsToMany,
+  HasMany
 } from "sequelize-typescript";
 
 import Company from "./Company";
+import Campaign from "./Campaign";
+import CampaignProduct from "./CampaignProduct";
+import ContactPurchase from "./ContactPurchase";
+import ServiceOrder from "./ServiceOrder";
 
 @Table
 class Product extends Model<Product> {
@@ -63,6 +69,15 @@ class Product extends Model<Product> {
 
   @UpdatedAt
   updatedAt: Date;
+
+  @BelongsToMany(() => Campaign, () => CampaignProduct)
+  campaigns: Campaign[];
+
+  @HasMany(() => ContactPurchase)
+  purchases: ContactPurchase[];
+
+  @HasMany(() => ServiceOrder)
+  serviceOrders: ServiceOrder[];
 }
 
 export default Product;
