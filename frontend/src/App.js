@@ -16,8 +16,8 @@ import { getBackendURL } from "./services/config";
 import Routes from "./routes";
 
 const queryClient = new QueryClient();
-const defaultLogoLight = "/vector/logo.svg";
-const defaultLogoDark = "/vector/logo-dark.svg";
+const defaultLogoLight = "/vector/logo.png";
+const defaultLogoDark = "/vector/logo-dark.png";
 const defaultLogoFavicon = "/vector/favicon.svg";
 
 function useViewportHeight() {
@@ -101,6 +101,9 @@ const App = () => {
 
   const theme = useMemo(() => createTheme(
     {
+      typography: {
+        fontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
+      },
       scrollbarStyles: {
         "&::-webkit-scrollbar": {
           width: '8px',

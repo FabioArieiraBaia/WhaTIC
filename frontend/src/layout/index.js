@@ -77,6 +77,8 @@ const useStyles = makeStyles((theme) => ({
     paddingRight: 24, // keep right padding when drawer closed
     color: localStorage.getItem("impersonated") === "true" ? theme.palette.secondary.contrastText : theme.palette.primary.contrastText,
     background: localStorage.getItem("impersonated") === "true" ? theme.palette.secondary.main : theme.palette.primary.main,
+    boxShadow: "none",
+    borderBottom: `1px solid ${theme.palette.divider}`,
   },
   toolbarIcon: {
     display: "flex",
@@ -117,6 +119,8 @@ const useStyles = makeStyles((theme) => ({
     position: "relative",
     whiteSpace: "nowrap",
     width: drawerWidth,
+    borderRight: "none",
+    boxShadow: theme.palette.type === "light" ? "2px 0 12px rgba(0,0,0,0.05)" : "2px 0 12px rgba(0,0,0,0.3)",
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,

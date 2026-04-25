@@ -34,6 +34,7 @@ import CreateMessageService, {
 import { logger } from "../../utils/logger";
 import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketService";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
+import { handleAIAgent } from "../AIServices/handleAIAgent";
 import UpdateTicketService, {
   UpdateTicketData
 } from "../TicketServices/UpdateTicketService";
@@ -1900,6 +1901,16 @@ const handleMessage = async (
 
     const dontReadTheFirstQuestion = ticket.queue === null;
 
+    if (justCreated && !isGroup) {
+      const autoReply = await GetCompanySetting(companyId, "aiAgentAutoReply", "disabled");
+      if (autoReply === "enabled") {
+        await updateTicket(ticket, { aiAgent: true });
+        ticket.aiAgent = true;
+        await handleAIAgent(wbot, ticket, bodyMessage);
+        return;
+      }
+    }
+
     await ticket.reload();
 
     if (
@@ -1933,6 +1944,11 @@ const handleMessage = async (
         debouncedSentMessage();
         return;
       }
+    }
+
+    if (ticket.aiAgent && !msg.key.fromMe && !isGroup) {
+      await handleAIAgent(wbot, ticket, bodyMessage);
+      return; // IA já respondeu, não precisa do chatbot
     }
 
     if (ticket.queue && ticket.chatbot) {

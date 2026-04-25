@@ -32,6 +32,7 @@ import Annoucements from "../pages/Annoucements";
 import Chat from "../pages/Chat";
 import ToDoList from "../pages/ToDoList/";
 import Subscription from "../pages/Subscription/";
+import Products from "../pages/Products/";
 
 const Routes = () => {
   const [showCampaigns, setShowCampaigns] = useState(false);
@@ -119,6 +120,7 @@ const Routes = () => {
                   component={Subscription}
                   isPrivate
                 />
+                <Route exact path="/products" component={Products} isPrivate />
                 
                 <Route exact path="/chats/:id?" component={Chat} isPrivate />
                 {showCampaigns && (

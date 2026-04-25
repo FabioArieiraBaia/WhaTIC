@@ -25,6 +25,7 @@ export interface UpdateTicketData {
   chatbot?: boolean;
   queueOptionId?: number;
   justClose?: boolean;
+  aiAgent?: boolean;
 }
 
 interface Request {
@@ -103,6 +104,7 @@ const UpdateTicketService = async ({
     const fromChatbot = ticketData.chatbot || false;
     let chatbot: boolean | null = fromChatbot;
     let queueOptionId: number | null = ticketData.queueOptionId || null;
+    let aiAgent: boolean | undefined = ticketData.aiAgent;
 
     const io = getIO();
 
@@ -283,7 +285,8 @@ const UpdateTicketService = async ({
       userId,
       whatsappId: ticket.whatsappId,
       chatbot,
-      queueOptionId
+      queueOptionId,
+      aiAgent: aiAgent !== undefined ? aiAgent : ticket.aiAgent
     });
 
     if (oldStatus !== status) {

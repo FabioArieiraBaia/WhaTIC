@@ -5,6 +5,8 @@ import { getPublicPath } from "./GetPublicPath";
 import { logger } from "../utils/logger";
 import { makeRandomId } from "./MakeRandomId";
 import Ticket from "../models/Ticket";
+import fs from "fs";
+import path from "path";
 
 type SaveMediaOptions = {
   destination: Ticket | number;
@@ -54,6 +56,10 @@ export default async function saveMediaToFile(
   const mediaPath = `${relativePath}/${media.filename}`;
 
   try {
+    const fullDir = path.join(getPublicPath(), relativePath);
+    if (!fs.existsSync(fullDir)) {
+      fs.mkdirSync(fullDir, { recursive: true });
+    }
     await storage.write(mediaPath, media.data);
   } catch (error) {
     logger.error({ message: error.message }, "Error saving media file");

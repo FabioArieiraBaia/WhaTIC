@@ -18,9 +18,11 @@ const useStyles = makeStyles(theme => ({
 	root: {
 		width: "100vw",
 		height: "100vh",
-		background: `linear-gradient(to right, ${ theme.mode === "light" ? "#fff , #fff , " + theme.palette.primary.main + " , #fff, #fff" : "#000, #000, " + theme.palette.primary.main + ", #000, #000" })`,
+		background: theme.mode === "light" 
+      ? `linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)`
+      : `linear-gradient(135deg, #1e1e2f 0%, #10101b 100%)`,
 		backgroundRepeat: "no-repeat",
-		backgroundSize: "100% 100%",
+		backgroundSize: "cover",
 		backgroundPosition: "center",
 		display: "flex",
 		flexDirection: "column",
@@ -29,12 +31,15 @@ const useStyles = makeStyles(theme => ({
 		textAlign: "center",
 	},
 	paper: {
-		backgroundColor: theme.palette.login, //DARK MODE PLW DESIGN//
+		backgroundColor: theme.mode === "light" ? "rgba(255, 255, 255, 0.85)" : "rgba(30, 30, 47, 0.85)",
+    backdropFilter: "blur(10px)",
 		display: "flex",
 		flexDirection: "column",
 		alignItems: "center",
-		padding: "55px 30px",
-		borderRadius: "12.5px",
+		padding: "40px 30px",
+		borderRadius: "16px",
+    boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.1)",
+    border: "1px solid rgba(255, 255, 255, 0.18)",
 	},
 	avatar: {
 		margin: theme.spacing(1),  

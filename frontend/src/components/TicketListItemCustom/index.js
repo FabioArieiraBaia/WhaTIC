@@ -327,6 +327,14 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
               />
             </Tooltip>
           )}
+          {ticket.aiAgent && (
+            <Tooltip title="Agente IA Ativo">
+              <AndroidIcon
+                fontSize="small"
+                style={{ color: blue[500], marginRight: 5 }}
+              />
+            </Tooltip>
+          )}
 
         </>
       );
@@ -397,6 +405,14 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
               <AndroidIcon
                 fontSize="small"
                 style={{ color: grey[700], marginRight: 5 }}
+              />
+            </Tooltip>
+          )}
+          {ticket.aiAgent && (
+            <Tooltip title="Agente IA Ativo">
+              <AndroidIcon
+                fontSize="small"
+                style={{ color: blue[500], marginRight: 5 }}
               />
             </Tooltip>
           )}

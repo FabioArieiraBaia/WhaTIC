@@ -113,6 +113,11 @@ export default function Options(props) {
   const [groupsTab, setGroupsTab] = useState("disabled");
   const [apiToken, setApiToken] = useState("");
   const [openAiKey, setOpenAiKey] = useState("");
+  const [geminiApiKey, setGeminiApiKey] = useState("");
+  const [aiAgentName, setAiAgentName] = useState("");
+  const [aiAgentPrompt, setAiAgentPrompt] = useState("");
+  const [aiAgentModel, setAiAgentModel] = useState("gemini-2.0-flash");
+  const [aiAgentAutoReply, setAiAgentAutoReply] = useState("disabled");
   const [aiProvider, setAiProvider] = useState("openai");
   const [audioTranscriptions, setAudioTranscriptions] = useState("disabled");
   const [uploadLimit, setUploadLimit] = useState("15");
@@ -214,6 +219,21 @@ export default function Options(props) {
       
       const openAiKey = settings.find((s) => s.key === "openAiKey");
       setOpenAiKey(openAiKey?.value || "");
+      
+      const geminiApiKey = settings.find((s) => s.key === "geminiApiKey");
+      setGeminiApiKey(geminiApiKey?.value || "");
+
+      const aiAgentName = settings.find((s) => s.key === "aiAgentName");
+      setAiAgentName(aiAgentName?.value || "");
+
+      const aiAgentPrompt = settings.find((s) => s.key === "aiAgentPrompt");
+      setAiAgentPrompt(aiAgentPrompt?.value || "");
+
+      const aiAgentModel = settings.find((s) => s.key === "aiAgentModel");
+      setAiAgentModel(aiAgentModel?.value || "gemini-2.0-flash");
+
+      const aiAgentAutoReply = settings.find((s) => s.key === "aiAgentAutoReply");
+      setAiAgentAutoReply(aiAgentAutoReply?.value || "disabled");
       
       const aiProvider = settings.find((s) => s.key === "aiProvider");
       setAiProvider(aiProvider?.value || "openai");
@@ -960,6 +980,78 @@ export default function Options(props) {
                 await handleSetting("openAiKey", openAiKey);
               }}
             />
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={12} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="gemini-key-field"
+              label="Gemini API Key"
+              variant="standard"
+              value={geminiApiKey}
+              onChange={(e) => setGeminiApiKey(e.target.value)}
+              onBlur={async (_) => await handleSetting("geminiApiKey", geminiApiKey)}
+            />
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={12} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="ai-agent-name-field"
+              label="Nome do Agente IA"
+              variant="standard"
+              value={aiAgentName}
+              onChange={(e) => setAiAgentName(e.target.value)}
+              onBlur={async (_) => await handleSetting("aiAgentName", aiAgentName)}
+            />
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={12} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="ai-agent-model-field"
+              label="Modelo do Agente IA (ex: gemini-2.0-flash)"
+              variant="standard"
+              value={aiAgentModel}
+              onChange={(e) => setAiAgentModel(e.target.value)}
+              onBlur={async (_) => await handleSetting("aiAgentModel", aiAgentModel)}
+            />
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={12} md={12} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="ai-agent-prompt-field"
+              label="Prompt do Agente IA"
+              variant="outlined"
+              multiline
+              minRows={3}
+              value={aiAgentPrompt}
+              onChange={(e) => setAiAgentPrompt(e.target.value)}
+              onBlur={async (_) => await handleSetting("aiAgentPrompt", aiAgentPrompt)}
+            />
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={12} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="ai-agent-autoreply-label">
+              Respostas Automáticas IA (Novos Chats)
+            </InputLabel>
+            <Select
+              labelId="ai-agent-autoreply-label"
+              value={aiAgentAutoReply}
+              onChange={async (e) => {
+                handleSetting("aiAgentAutoReply", e.target.value, setAiAgentAutoReply);
+              }}
+            >
+              <MenuItem value="disabled">{i18n.t("common.disabled")}</MenuItem>
+              <MenuItem value="enabled">{i18n.t("common.enabled")}</MenuItem>
+            </Select>
           </FormControl>
         </Grid>
         

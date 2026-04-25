@@ -2,8 +2,8 @@ import React, { useContext, useState } from "react";
 import { useHistory } from "react-router-dom";
 
 import { makeStyles } from "@material-ui/core/styles";
-import { IconButton } from "@material-ui/core";
-import { MoreVert, Replay } from "@material-ui/icons";
+import { IconButton, Tooltip } from "@material-ui/core";
+import { MoreVert, Replay, Android } from "@material-ui/icons";
 
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
@@ -61,6 +61,16 @@ const TicketActionButtons = ({ ticket }) => {
 		}
 	};
 
+	const handleToggleAIAgent = async () => {
+		try {
+			await api.put(`/tickets/${ticket.id}`, {
+				aiAgent: !ticket.aiAgent,
+			});
+		} catch (err) {
+			toastError(err);
+		}
+	};
+
 	return (
 		<div className={classes.actionButtons}>
 			{ticket.status === "closed" && (
@@ -92,6 +102,11 @@ const TicketActionButtons = ({ ticket }) => {
 					>
 						{i18n.t("messagesList.header.buttons.resolve")}
 					</ButtonWithSpinner>
+					<Tooltip title="Ativar/Desativar Agente IA">
+						<IconButton onClick={handleToggleAIAgent}>
+							<Android color={ticket.aiAgent ? "primary" : "action"} />
+						</IconButton>
+					</Tooltip>
 					<IconButton onClick={handleOpenTicketOptionsMenu}>
 						<MoreVert />
 					</IconButton>
