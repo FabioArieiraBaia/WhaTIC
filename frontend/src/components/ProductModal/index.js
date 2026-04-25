@@ -50,7 +50,8 @@ const ProductSchema = Yup.object().shape({
     .max(50, "Muito longo!")
     .required("Obrigatório"),
   price: Yup.number().required("Obrigatório"),
-  purchaseUrl: Yup.string().url("URL inválida").required("Obrigatório"),
+  purchaseUrl: Yup.string().url("URL inválida").nullable(),
+  videoUrl: Yup.string().url("URL inválida").nullable(),
 });
 
 const ProductModal = ({ open, onClose, productId }) => {
@@ -62,11 +63,16 @@ const ProductModal = ({ open, onClose, productId }) => {
     price: "",
     purchaseUrl: "",
     promotionalPrice: "",
+    videoUrl: "",
+    testimonials: "",
+    relatedProducts: "",
     isActive: true,
   };
 
   const [product, setProduct] = useState(initialState);
   const [attachment, setAttachment] = useState(null);
+  const [testimonialAudio, setTestimonialAudio] = useState(null);
+  const [testimonialImage, setTestimonialImage] = useState(null);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -95,8 +101,17 @@ const ProductModal = ({ open, onClose, productId }) => {
       formData.append("price", values.price);
       formData.append("promotionalPrice", values.promotionalPrice || "");
       formData.append("purchaseUrl", values.purchaseUrl || "");
+      formData.append("videoUrl", values.videoUrl || "");
+      formData.append("testimonials", values.testimonials || "");
+      formData.append("relatedProducts", values.relatedProducts || "");
       if (attachment) {
         formData.append("image", attachment);
+      }
+      if (testimonialAudio) {
+        formData.append("testimonialAudio", testimonialAudio);
+      }
+      if (testimonialImage) {
+        formData.append("testimonialImage", testimonialImage);
       }
 
       if (productId) {
@@ -194,7 +209,7 @@ const ProductModal = ({ open, onClose, productId }) => {
                 <div className={classes.multFieldLine}>
                   <Field
                     as={TextField}
-                    label={i18n.t("Link de Compra")}
+                    label={i18n.t("Link de Compra (Opcional)")}
                     name="purchaseUrl"
                     error={touched.purchaseUrl && Boolean(errors.purchaseUrl)}
                     helperText={touched.purchaseUrl && errors.purchaseUrl}
@@ -203,20 +218,91 @@ const ProductModal = ({ open, onClose, productId }) => {
                     fullWidth
                   />
                 </div>
-                <div style={{ marginTop: 10 }}>
-                  <input
-                    accept="image/*"
-                    style={{ display: 'none' }}
-                    id="raised-button-file"
-                    type="file"
-                    onChange={(e) => setAttachment(e.target.files[0])}
+                <div className={classes.multFieldLine}>
+                  <Field
+                    as={TextField}
+                    label={i18n.t("Link do Vídeo (Ex: YouTube/Vimeo)")}
+                    name="videoUrl"
+                    error={touched.videoUrl && Boolean(errors.videoUrl)}
+                    helperText={touched.videoUrl && errors.videoUrl}
+                    variant="outlined"
+                    margin="dense"
+                    fullWidth
                   />
-                  <label htmlFor="raised-button-file">
-                    <Button variant="contained" component="span">
-                      Anexar Imagem
-                    </Button>
-                  </label>
-                  {attachment && <span style={{ marginLeft: 10 }}>{attachment.name}</span>}
+                </div>
+                <div className={classes.multFieldLine}>
+                  <Field
+                    as={TextField}
+                    label={i18n.t("Testemunhos de Clientes")}
+                    name="testimonials"
+                    error={touched.testimonials && Boolean(errors.testimonials)}
+                    helperText={touched.testimonials && errors.testimonials}
+                    variant="outlined"
+                    margin="dense"
+                    fullWidth
+                    multiline
+                    rows={2}
+                  />
+                </div>
+                <div className={classes.multFieldLine}>
+                  <Field
+                    as={TextField}
+                    label={i18n.t("Produtos Relacionados / Sugestões")}
+                    name="relatedProducts"
+                    error={touched.relatedProducts && Boolean(errors.relatedProducts)}
+                    helperText={touched.relatedProducts && errors.relatedProducts}
+                    variant="outlined"
+                    margin="dense"
+                    fullWidth
+                    multiline
+                    rows={2}
+                  />
+                </div>
+                <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                  <div>
+                    <input
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      id="raised-button-file"
+                      type="file"
+                      onChange={(e) => setAttachment(e.target.files[0])}
+                    />
+                    <label htmlFor="raised-button-file">
+                      <Button variant="contained" component="span" size="small">
+                        {attachment ? "Imagem OK" : "Imagem Produto"}
+                      </Button>
+                    </label>
+                  </div>
+
+                  <div>
+                    <input
+                      accept="audio/*"
+                      style={{ display: 'none' }}
+                      id="testimonial-audio-file"
+                      type="file"
+                      onChange={(e) => setTestimonialAudio(e.target.files[0])}
+                    />
+                    <label htmlFor="testimonial-audio-file">
+                      <Button variant="contained" component="span" size="small" color="primary">
+                        {testimonialAudio ? "Áudio OK" : "Áudio Depoimento"}
+                      </Button>
+                    </label>
+                  </div>
+
+                  <div>
+                    <input
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      id="testimonial-image-file"
+                      type="file"
+                      onChange={(e) => setTestimonialImage(e.target.files[0])}
+                    />
+                    <label htmlFor="testimonial-image-file">
+                      <Button variant="contained" component="span" size="small" color="primary">
+                        {testimonialImage ? "Print Depoimento" : "Print Depoimento"}
+                      </Button>
+                    </label>
+                  </div>
                 </div>
               </DialogContent>
               <DialogActions>

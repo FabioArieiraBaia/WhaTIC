@@ -12,12 +12,17 @@ interface GeminiServiceProps {
   companyId: number;
   ticketId: number;
   messageBody: string;
+  mediaData?: {
+    base64: string;
+    mimeType: string;
+  };
 }
 
 export const GeminiService = async ({
   companyId,
   ticketId,
-  messageBody
+  messageBody,
+  mediaData
 }: GeminiServiceProps): Promise<string> => {
   const geminiApiKey = await GetCompanySetting(companyId, "geminiApiKey", "");
   const aiAgentName = await GetCompanySetting(companyId, "aiAgentName", "Assistente");
@@ -86,7 +91,15 @@ export const GeminiService = async ({
       if (p.promotionalPrice && parseFloat(p.promotionalPrice.toString()) > 0) {
         priceText = `DE R$ ${p.price} POR APENAS R$ ${p.promotionalPrice} (OFERTA ESPECIAL)`;
       }
-      return `- ${p.name}: ${priceText} - ${p.description || ""} - Link de Compra: ${p.purchaseUrl || "N/A"}`;
+      let productInfo = `- ${p.name}: ${priceText} - ${p.description || ""}`;
+      if (p.videoUrl) productInfo += `\n  - Vídeo de Demonstração: ${p.videoUrl}`;
+      if (p.testimonials) productInfo += `\n  - Testemunhos Texto: ${p.testimonials}`;
+      if (p.testimonialAudioUrl) productInfo += `\n  - ÁUDIO DE DEPOIMENTO REAL DISPONÍVEL (Use o comando [SEND_AUDIO_${p.id}] para enviar)`;
+      if (p.testimonialImageUrl) productInfo += `\n  - PRINT DE DEPOIMENTO REAL DISPONÍVEL (Use o comando [SEND_PRINT_${p.id}] para enviar)`;
+      if (p.relatedProducts) productInfo += `\n  - Produtos Relacionados (Upsell): ${p.relatedProducts}`;
+      if (p.purchaseUrl) productInfo += `\n  - Link de Compra: ${p.purchaseUrl}`;
+      
+      return productInfo;
     }).join("\n");
   }
 
@@ -113,11 +126,11 @@ ${serviceOrdersText}
 ${productsText ? productsText : "Nenhum produto disponível no momento."}
 
 Regras:
-- Responda de forma natural e amigável.
-- Sempre verifique se o produto possui PREÇO PROMOCIONAL e priorize informar este valor como uma oferta especial.
-- Quando o cliente perguntar sobre produtos, ofereça do catálogo.
-- Inclua o link de compra quando relevante.
-- Se não souber algo, informe que um atendente humano irá ajudar.
+- Use os **Testemunhos** como prova social quando o cliente estiver em dúvida ou precisar de segurança.
+- Ofereça o **Vídeo de Demonstração** para mostrar o produto em funcionamento e gerar desejo.
+- Utilize os **Produtos Relacionados** para fazer Upsell ou Cross-sell quando o cliente demonstrar interesse em algo ou estiver finalizando uma compra.
+- O link de compra é opcional; se não houver, foque em converter o cliente para que ele peça o link ou finalize por aqui.
+- Se o cliente enviar uma IMAGEM, ÁUDIO ou DOCUMENTO, analise o conteúdo com atenção e responda de acordo. Você tem visão e audição completas agora.
 - Responda APENAS com o texto que deve ser enviado ao cliente, sem formatações extras.
 `;
 
@@ -131,7 +144,18 @@ ${contactName}: ${messageBody}
 ${aiAgentName}:`;
 
   try {
-    const result = await model.generateContent(prompt);
+    const parts: any[] = [{ text: prompt }];
+
+    if (mediaData && mediaData.base64 && mediaData.mimeType) {
+      parts.push({
+        inlineData: {
+          data: mediaData.base64,
+          mimeType: mediaData.mimeType
+        }
+      });
+    }
+
+    const result = await model.generateContent(parts);
     const response = result.response;
     return response.text().trim();
   } catch (error) {

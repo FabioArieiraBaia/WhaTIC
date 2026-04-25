@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useReducer, useState } from "react";
 import { Link as RouterLink, useHistory } from "react-router-dom";
+import clsx from "clsx";
 
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
@@ -55,7 +56,7 @@ const gitinfo = loadJSON('/gitinfo.json');
 const useStyles = makeStyles((theme) => ({
   ListSubheader: {
     height: 26,
-    marginTop: "-15px",
+    marginTop: "10px",
     marginBottom: "-10px",
   },
 }));
@@ -344,6 +345,11 @@ const MainListItems = (props) => {
                 primary={i18n.t("Produtos")}
                 icon={<ShoppingCartIcon />}
               />
+              <ListItemLink
+                to="/financeiro-gestao"
+                primary={i18n.t("Financeiro")}
+                icon={<LocalAtmIcon />}
+              />
             </List>
           </Collapse>
         </>
@@ -460,7 +466,7 @@ const MainListItems = (props) => {
                 />
                 <ListItemLink
                   to="/financeiro"
-                  primary={i18n.t("mainDrawer.listItems.financeiro")}
+                  primary={i18n.t("Faturas")}
                   icon={<LocalAtmIcon />}
                 />
                 <ListItemLink

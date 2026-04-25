@@ -30,11 +30,14 @@ const ContactServiceOrders = ({ contactId }) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [editingOrder, setEditingOrder] = useState(null);
-  const [newOrder, setNewOrder] = useState({
+  const initialOrderState = {
     productId: "",
     description: "",
-    status: "PENDENTE"
-  });
+    status: "PENDENTE",
+    value: 0
+  };
+
+  const [orderData, setOrderData] = useState(initialOrderState);
 
   const statuses = [
     { value: "PENDENTE", label: "Pendente", color: "#f44336" },
@@ -71,23 +74,19 @@ const ContactServiceOrders = ({ contactId }) => {
     try {
       if (editingOrder) {
         await api.put(`/contacts/service-orders/${editingOrder.id}`, {
-          ...newOrder
+          ...orderData
         });
         toast.success("OS atualizada com sucesso");
       } else {
         await api.post("/contacts/service-orders", {
-          ...newOrder,
+          ...orderData,
           contactId
         });
         toast.success("OS aberta com sucesso");
       }
       setOpen(false);
       setEditingOrder(null);
-      setNewOrder({
-        productId: "",
-        description: "",
-        status: "PENDENTE"
-      });
+      setOrderData(initialOrderState);
       fetchOrders();
     } catch (err) {
       toast.error("Erro ao salvar OS");
@@ -108,10 +107,11 @@ const ContactServiceOrders = ({ contactId }) => {
 
   const handleEditOrder = (order) => {
     setEditingOrder(order);
-    setNewOrder({
+    setOrderData({
       productId: order.productId || "",
       description: order.description,
-      status: order.status
+      status: order.status,
+      value: order.value || 0
     });
     setOpen(true);
   };
@@ -133,7 +133,7 @@ const ContactServiceOrders = ({ contactId }) => {
               secondary={
                 <>
                   <Typography variant="caption" display="block">
-                    {order.product?.name || "Sem Produto"}
+                    {order.product?.name || "Sem Produto"} {order.value > 0 && `• R$ ${order.value}`}
                   </Typography>
                   <Chip
                     size="small"
@@ -167,8 +167,8 @@ const ContactServiceOrders = ({ contactId }) => {
           <FormControl fullWidth margin="dense" variant="outlined">
             <InputLabel>Produto Relacionado</InputLabel>
             <Select
-              value={newOrder.productId}
-              onChange={(e) => setNewOrder({ ...newOrder, productId: e.target.value })}
+              value={orderData.productId}
+              onChange={(e) => setOrderData({ ...orderData, productId: e.target.value })}
               label="Produto Relacionado"
             >
               <MenuItem value="">Nenhum</MenuItem>
@@ -180,18 +180,27 @@ const ContactServiceOrders = ({ contactId }) => {
           <TextField
             fullWidth
             margin="dense"
+            label="Valor do Serviço (R$)"
+            variant="outlined"
+            type="number"
+            value={orderData.value}
+            onChange={(e) => setOrderData({ ...orderData, value: e.target.value })}
+          />
+          <TextField
+            fullWidth
+            margin="dense"
             label="Descrição do Serviço"
             variant="outlined"
             multiline
             rows={3}
-            value={newOrder.description}
-            onChange={(e) => setNewOrder({ ...newOrder, description: e.target.value })}
+            value={orderData.description}
+            onChange={(e) => setOrderData({ ...orderData, description: e.target.value })}
           />
           <FormControl fullWidth margin="dense" variant="outlined">
             <InputLabel>Status</InputLabel>
             <Select
-              value={newOrder.status}
-              onChange={(e) => setNewOrder({ ...newOrder, status: e.target.value })}
+              value={orderData.status}
+              onChange={(e) => setOrderData({ ...orderData, status: e.target.value })}
               label="Status"
             >
               {statuses.map(s => (
@@ -202,7 +211,7 @@ const ContactServiceOrders = ({ contactId }) => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => { setOpen(false); setEditingOrder(null); }}>Cancelar</Button>
-          <Button color="primary" variant="contained" onClick={handleSaveOrder} disabled={loading || !newOrder.description}>
+          <Button color="primary" variant="contained" onClick={handleSaveOrder} disabled={loading || !orderData.description}>
             {loading ? "Salvando..." : "Salvar"}
           </Button>
         </DialogActions>

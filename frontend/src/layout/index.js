@@ -74,9 +74,9 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
   },
   toolbar: {
-    paddingRight: 24, // keep right padding when drawer closed
-    color: localStorage.getItem("impersonated") === "true" ? theme.palette.secondary.contrastText : theme.palette.primary.contrastText,
-    background: localStorage.getItem("impersonated") === "true" ? theme.palette.secondary.main : theme.palette.primary.main,
+    paddingRight: 24,
+    color: theme.palette.text.primary,
+    background: theme.palette.background.paper,
     boxShadow: "none",
     borderBottom: `1px solid ${theme.palette.divider}`,
   },
@@ -84,7 +84,8 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    minHeight: "48px",
+    padding: "0 16px",
+    minHeight: "64px",
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
@@ -92,6 +93,8 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
+    backgroundColor: "transparent",
+    boxShadow: "none",
   },
   appBarShift: {
     marginLeft: drawerWidth,
@@ -105,7 +108,9 @@ const useStyles = makeStyles((theme) => ({
     }
   },
   menuButton: {
-    marginRight: 36,
+    marginRight: 20,
+    backgroundColor: theme.palette.background.paper,
+    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
   },
   menuButtonHidden: {
     display: "none",
@@ -113,14 +118,16 @@ const useStyles = makeStyles((theme) => ({
   title: {
     flexGrow: 1,
     fontSize: 14,
-    color: "white",
+    fontWeight: 600,
+    color: theme.palette.text.primary,
   },
   drawerPaper: {
     position: "relative",
     whiteSpace: "nowrap",
     width: drawerWidth,
     borderRight: "none",
-    boxShadow: theme.palette.type === "light" ? "2px 0 12px rgba(0,0,0,0.05)" : "2px 0 12px rgba(0,0,0,0.3)",
+    backgroundColor: theme.palette.background.paper,
+    boxShadow: theme.palette.type === "light" ? "4px 0 24px rgba(0,0,0,0.03)" : "4px 0 24px rgba(0,0,0,0.2)",
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
@@ -135,10 +142,7 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
-    width: theme.spacing(7),
-    [theme.breakpoints.up("sm")]: {
-      width: theme.spacing(9),
-    },
+    width: theme.spacing(9),
   },
   appBarSpacer: {
     minHeight: "48px",
@@ -482,7 +486,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
               aria-haspopup="true"
               onClick={handleProfileMenu}
               variant="contained"
-              style={{ color: "white" }}
+              style={{ color: theme.palette.text.primary, backgroundColor: theme.palette.background.default, borderRadius: 12 }}
             >
               <AccountCircle />
             </IconButton>

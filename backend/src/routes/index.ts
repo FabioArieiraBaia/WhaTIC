@@ -34,6 +34,7 @@ import i18nRoutes from "./i18nRoutes";
 import wavoipRoutes from "./wavoipRoutes";
 import productRoutes from "./productRoutes";
 import sleadsRoutes from "./sleadsRoutes";
+import financeiroRoutes from "./financeiroRoutes";
 
 const routes = Router();
 
@@ -72,5 +73,6 @@ routes.use(i18nRoutes);
 routes.use(wavoipRoutes);
 routes.use(productRoutes);
 routes.use(sleadsRoutes);
+routes.use(financeiroRoutes);
 
 export default routes;

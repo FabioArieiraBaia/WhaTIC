@@ -43,6 +43,10 @@ class ServiceOrder extends Model<ServiceOrder> {
   @Column(DataType.ENUM("PENDENTE", "EM_ANDAMENTO", "REVISAO", "CONCLUIDO"))
   status: string;
 
+  @Default(0)
+  @Column(DataType.DECIMAL(10, 2))
+  value: number;
+
   @ForeignKey(() => Company)
   @Column
   companyId: number;

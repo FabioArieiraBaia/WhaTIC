@@ -48,6 +48,21 @@ class Product extends Model<Product> {
   purchaseUrl: string;
 
   @Column
+  videoUrl: string;
+
+  @Column(DataType.TEXT)
+  testimonials: string;
+
+  @Column
+  testimonialAudioUrl: string;
+
+  @Column
+  testimonialImageUrl: string;
+
+  @Column(DataType.TEXT)
+  relatedProducts: string;
+
+  @Column
   imageUrl: string;
 
   @Column

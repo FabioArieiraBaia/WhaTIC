@@ -1906,7 +1906,23 @@ const handleMessage = async (
       if (autoReply === "enabled") {
         await updateTicket(ticket, { aiAgent: true });
         ticket.aiAgent = true;
-        await handleAIAgent(wbot, ticket, bodyMessage);
+
+        let mediaData = null;
+        if (messageMedia) {
+          try {
+            const media = await downloadMedia(unpackedMessage, wbot, ticket, msg.key.fromMe);
+            if (media) {
+              mediaData = {
+                base64: media.data.toString("base64"),
+                mimeType: media.mimetype
+              };
+            }
+          } catch (e) {
+            logger.error(`Error downloading media for AI Agent: ${e.message}`);
+          }
+        }
+
+        await handleAIAgent(wbot, ticket, bodyMessage, mediaData);
         return;
       }
     }
@@ -1947,7 +1963,21 @@ const handleMessage = async (
     }
 
     if (ticket.aiAgent && !msg.key.fromMe && !isGroup) {
-      await handleAIAgent(wbot, ticket, bodyMessage);
+      let mediaData = null;
+      if (messageMedia) {
+        try {
+          const media = await downloadMedia(unpackedMessage, wbot, ticket, msg.key.fromMe);
+          if (media) {
+            mediaData = {
+              base64: media.data.toString("base64"),
+              mimeType: media.mimetype
+            };
+          }
+        } catch (e) {
+          logger.error(`Error downloading media for AI Agent: ${e.message}`);
+        }
+      }
+      await handleAIAgent(wbot, ticket, bodyMessage, mediaData);
       return; // IA já respondeu, não precisa do chatbot
     }
 

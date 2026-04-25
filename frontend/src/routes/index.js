@@ -34,6 +34,7 @@ import Chat from "../pages/Chat";
 import ToDoList from "../pages/ToDoList/";
 import Subscription from "../pages/Subscription/";
 import Products from "../pages/Products/";
+import FinanceiroGestao from "../pages/FinanceiroGestao/";
 
 const Routes = () => {
   const [showCampaigns, setShowCampaigns] = useState(false);
@@ -122,6 +123,7 @@ const Routes = () => {
                   isPrivate
                 />
                 <Route exact path="/products" component={Products} isPrivate />
+                <Route exact path="/financeiro-gestao" component={FinanceiroGestao} isPrivate />
                 
                 <Route exact path="/chats/:id?" component={Chat} isPrivate />
                 {showCampaigns && (

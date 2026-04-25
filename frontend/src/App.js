@@ -102,7 +102,61 @@ const App = () => {
   const theme = useMemo(() => createTheme(
     {
       typography: {
-        fontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
+        fontFamily: '"Outfit", "Inter", "Helvetica", "Arial", sans-serif',
+        h1: { fontWeight: 700 },
+        h2: { fontWeight: 700 },
+        h3: { fontWeight: 600 },
+        button: { textTransform: 'none', fontWeight: 600 },
+      },
+      shape: {
+        borderRadius: 12,
+      },
+      overrides: {
+        MuiButton: {
+          root: {
+            borderRadius: 12,
+            padding: '8px 20px',
+            transition: 'all 0.2s ease-in-out',
+            '&:hover': {
+              transform: 'translateY(-1px)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            },
+          },
+          containedPrimary: {
+            background: `linear-gradient(45deg, ${mode === "light" ? primaryColorLight : primaryColorDark} 30%, ${mode === "light" ? primaryColorLight : primaryColorDark} 90%)`,
+          },
+        },
+        MuiPaper: {
+          rounded: {
+            borderRadius: 16,
+          },
+          elevation1: {
+            boxShadow: '0 4px 20px 0 rgba(0,0,0,0.05)',
+          },
+        },
+        MuiDrawer: {
+          paper: {
+            backgroundColor: mode === "light" ? "rgba(255, 255, 255, 0.8)" : "rgba(15, 23, 42, 0.8)",
+            backdropFilter: 'blur(12px)',
+            borderRight: '1px solid rgba(255,255,255,0.1)',
+          },
+        },
+        MuiAppBar: {
+          root: {
+            backgroundColor: mode === "light" ? "rgba(255, 255, 255, 0.7)" : "rgba(15, 23, 42, 0.7)",
+            backdropFilter: 'blur(12px)',
+            color: mode === "light" ? "#1e293b" : "#f8fafc",
+            boxShadow: 'none',
+            borderBottom: '1px solid rgba(255,255,255,0.1)',
+          },
+        },
+        MuiTab: {
+          root: {
+            borderRadius: 8,
+            margin: '4px',
+            minHeight: '40px',
+          },
+        },
       },
       scrollbarStyles: {
         "&::-webkit-scrollbar": {
@@ -125,45 +179,46 @@ const App = () => {
       palette: {
         type: mode,
         primary: { main: mode === "light" ? primaryColorLight : primaryColorDark },
-        textPrimary: mode === "light" ? primaryColorLight : primaryColorDark,
+        secondary: { main: '#f43f5e' },
+        textPrimary: mode === "light" ? "#1e293b" : "#f1f5f9",
         textCommon: mode === "light" ? "#000" : "#fff",
         borderPrimary: mode === "light" ? primaryColorLight : primaryColorDark,
         background: {
-          default: mode === "light" ? "#fafafa" : "#303030",
-          paper: mode === "light" ? "#fff" : "#424242"
+          default: mode === "light" ? "#f8fafc" : "#0f172a",
+          paper: mode === "light" ? "#ffffff" : "#1e293b"
         },
         backgroundContrast: {
-          default: mode === "light" ? "#ddd" : "#888",
-          paper: mode === "light" ? "#ddd" : "#888",
-          border: mode === "light" ? "#aaa" : "#444",
+          default: mode === "light" ? "#f1f5f9" : "#1e293b",
+          paper: mode === "light" ? "#f1f5f9" : "#1e293b",
+          border: mode === "light" ? "#e2e8f0" : "#334155",
         },
-        dark: { main: mode === "light" ? "#333333" : "#666" },
-        light: { main: mode === "light" ? "#F3F3F3" : "#333333" },
-        chatBubbleFromMe: { main: mode === "light" ? "#dcf8c6" : "#005c4b" },
-        chatBubbleReceived: { main: mode === "light" ? "#fff" : "#024481" },
-        chatBackground: { main: mode === "light" ? "#f3f3f3" : "#333" },
-        tabHeaderBackground: mode === "light" ? "#EEE" : "#666",
-        optionsBackground: mode === "light" ? "#fafafa" : "#333",
-        options: mode === "light" ? "#fafafa" : "#666",
+        dark: { main: mode === "light" ? "#1e293b" : "#f1f5f9" },
+        light: { main: mode === "light" ? "#f1f5f9" : "#1e293b" },
+        chatBubbleFromMe: { main: mode === "light" ? "#6366f1" : "#4f46e5" },
+        chatBubbleReceived: { main: mode === "light" ? "#ffffff" : "#334155" },
+        chatBackground: { main: mode === "light" ? "#f1f5f9" : "#0f172a" },
+        tabHeaderBackground: mode === "light" ? "#f1f5f9" : "#1e293b",
+        optionsBackground: mode === "light" ? "#ffffff" : "#1e293b",
+        options: mode === "light" ? "#ffffff" : "#1e293b",
         fontecor: mode === "light" ? primaryColorLight : primaryColorDark,
-        fancyBackground: mode === "light" ? "#fafafa" : "#333",
-        bordabox: mode === "light" ? "#eee" : "#333",
-        newmessagebox: mode === "light" ? "#eee" : "#333",
-        inputdigita: mode === "light" ? "#fff" : "#666",
-        contactdrawer: mode === "light" ? "#fff" : "#666",
-        announcements: mode === "light" ? "#ededed" : "#333",
-        login: mode === "light" ? "#fff" : "#1C1C1C",
-        announcementspopover: mode === "light" ? "#fff" : "#666",
-        chatlist: { main: mode === "light" ? "#dfdfdf" : "#555" },
-        boxlist: mode === "light" ? "#ededed" : "#666",
-        boxchatlist: mode === "light" ? "#ededed" : "#333",
-        total: mode === "light" ? "#fff" : "#222",
-        messageIcons: mode === "light" ? "grey" : "#F3F3F3",
-        inputBackground: mode === "light" ? "#FFFFFF" : "#333",
-        barraSuperior: mode === "light" ? primaryColorLight : "#666",
-        boxticket: mode === "light" ? "#EEE" : "#666",
-        campaigntab: mode === "light" ? "#ededed" : "#666",
-        ticketzproad: { main: "#39ACE7", contrastText: "white" }
+        fancyBackground: mode === "light" ? "#ffffff" : "#1e293b",
+        bordabox: mode === "light" ? "#e2e8f0" : "#334155",
+        newmessagebox: mode === "light" ? "#f1f5f9" : "#334155",
+        inputdigita: mode === "light" ? "#ffffff" : "#1e293b",
+        contactdrawer: mode === "light" ? "#ffffff" : "#1e293b",
+        announcements: mode === "light" ? "#f1f5f9" : "#1e293b",
+        login: mode === "light" ? "#ffffff" : "#0f172a",
+        announcementspopover: mode === "light" ? "#ffffff" : "#1e293b",
+        chatlist: { main: mode === "light" ? "#f1f5f9" : "#1e293b" },
+        boxlist: mode === "light" ? "#f1f5f9" : "#1e293b",
+        boxchatlist: mode === "light" ? "#f1f5f9" : "#1e293b",
+        total: mode === "light" ? "#1e293b" : "#f1f5f9",
+        messageIcons: mode === "light" ? "#64748b" : "#94a3b8",
+        inputBackground: mode === "light" ? "#ffffff" : "#1e293b",
+        barraSuperior: mode === "light" ? "#ffffff" : "#1e293b",
+        boxticket: mode === "light" ? "#f1f5f9" : "#1e293b",
+        campaigntab: mode === "light" ? "#f1f5f9" : "#1e293b",
+        ticketzproad: { main: "#6366f1", contrastText: "white" }
       },
       mode,
       appLogoLight,

@@ -18,8 +18,18 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
   const productData = req.body;
 
-  if (req.file) {
-    productData.imageUrl = req.file.filename;
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
+  if (files) {
+    if (files.image) {
+      productData.imageUrl = files.image[0].filename;
+    }
+    if (files.testimonialAudio) {
+      productData.testimonialAudioUrl = files.testimonialAudio[0].filename;
+    }
+    if (files.testimonialImage) {
+      productData.testimonialImageUrl = files.testimonialImage[0].filename;
+    }
   }
 
   if (productData.promotionalPrice === "null" || productData.promotionalPrice === "") {
@@ -63,8 +73,18 @@ export const update = async (
   const productData = req.body;
   const { companyId } = req.user;
 
-  if (req.file) {
-    productData.imageUrl = req.file.filename;
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
+  if (files) {
+    if (files.image) {
+      productData.imageUrl = files.image[0].filename;
+    }
+    if (files.testimonialAudio) {
+      productData.testimonialAudioUrl = files.testimonialAudio[0].filename;
+    }
+    if (files.testimonialImage) {
+      productData.testimonialImageUrl = files.testimonialImage[0].filename;
+    }
   }
 
   if (productData.promotionalPrice === "null" || productData.promotionalPrice === "") {
