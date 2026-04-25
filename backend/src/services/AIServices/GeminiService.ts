@@ -4,6 +4,9 @@ import Product from "../../models/Product";
 import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
 import Contact from "../../models/Contact";
+import ContactPurchase from "../../models/ContactPurchase";
+import ServiceOrder from "../../models/ServiceOrder";
+import ContactCustomField from "../../models/ContactCustomField";
 
 interface GeminiServiceProps {
   companyId: number;
@@ -31,10 +34,34 @@ export const GeminiService = async ({
   const model = genAI.getGenerativeModel({ model: aiAgentModel });
 
   const ticket = await Ticket.findByPk(ticketId, {
-    include: [{ model: Contact, as: "contact" }]
+    include: [
+      { 
+        model: Contact, 
+        as: "contact",
+        include: [
+          "extraInfo",
+          { model: ContactPurchase, include: [{ model: Product, attributes: ["name"] }] },
+          { model: ServiceOrder, include: [{ model: Product, attributes: ["name"] }] }
+        ]
+      }
+    ]
   });
 
-  const contactName = ticket?.contact?.name || "Cliente";
+  const contact = ticket?.contact;
+  const contactName = contact?.name || "Cliente";
+
+  // Format Extra Info
+  const extraInfoText = contact?.extraInfo?.map(info => `- ${info.name}: ${info.value}`).join("\n") || "Nenhuma informação extra.";
+
+  // Format Purchases
+  const purchasesText = contact?.purchases?.map(p => 
+    `- ${p.product?.name || "Produto"}: R$ ${p.price} em ${new Date(p.purchaseDate).toLocaleDateString("pt-BR")}`
+  ).join("\n") || "Nenhuma compra registrada.";
+
+  // Format Service Orders
+  const serviceOrdersText = contact?.serviceOrders?.map(os => 
+    `- ${os.description} (Status: ${os.status}) ${os.product ? `[Produto: ${os.product.name}]` : ""}`
+  ).join("\n") || "Nenhuma ordem de serviço registrada.";
 
   // Get ticket messages for context
   const messages = await Message.findAll({
@@ -67,6 +94,16 @@ ${aiAgentPrompt}
 
 === Base de Conhecimento ===
 ${aiAgentKnowledge}
+
+=== Perfil do Cliente (${contactName}) ===
+Informações Extras:
+${extraInfoText}
+
+Histórico de Compras:
+${purchasesText}
+
+Ordens de Serviço:
+${serviceOrdersText}
 
 === Catálogo de Produtos ===
 ${productsText ? productsText : "Nenhum produto disponível no momento."}
