@@ -14,7 +14,7 @@
     "resolveJsonModule": true,
     "moduleResolution": "node",
     "baseUrl": ".",
-    "lib": ["ESNext"],
+    "lib": ["ESNext", "dom"],
     "types": ["node"],
     "useDefineForClassFields": false
   },

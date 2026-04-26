@@ -43,9 +43,10 @@ export const handleAIAgent = async (
           await SendWhatsAppMedia({
             media: {
               path: filePath,
-              filename: product.testimonialAudioUrl,
-              mimetype: "audio/mp4" // WhatsApp preferred
-            },
+              originalname: product.testimonialAudioUrl,
+              mimetype: "audio/mp4",
+              size: fs.statSync(filePath).size
+            } as any,
             ticket
           });
         }
@@ -62,9 +63,10 @@ export const handleAIAgent = async (
           await SendWhatsAppMedia({
             media: {
               path: filePath,
-              filename: product.testimonialImageUrl,
-              mimetype: "image/png"
-            },
+              originalname: product.testimonialImageUrl,
+              mimetype: "image/png",
+              size: fs.statSync(filePath).size
+            } as any,
             ticket
           });
         }

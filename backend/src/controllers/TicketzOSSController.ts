@@ -29,7 +29,7 @@ export async function store(req: Request, res: Response): Promise<Response> {
     companyId: 1
   });
 
-  const frontendUrl = URL.parse(process.env.FRONTEND_URL);
+  const frontendUrl = new URL(process.env.FRONTEND_URL as string);
   let { hostname } = frontendUrl;
   if (frontendUrl.protocol === "http:") {
     let uniqueInstallId = await cacheLayer.get("uniqueInstallId");
