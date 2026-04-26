@@ -16,21 +16,21 @@ import User from "./User"; // Importação da model User
 class UserSocketSession extends Model<UserSocketSession> {
   @PrimaryKey
   @Column(DataType.STRING)
-  id: string;
+  declare id: string;
 
   @ForeignKey(() => User)
   @Column
-  userId: number;
+  declare userId: number;
 
   @Default(true)
   @Column(DataType.BOOLEAN)
-  active: boolean;
+  declare active: boolean;
 
   @CreatedAt
-  createdAt: Date;
+  declare createdAt: Date;
 
   @UpdatedAt
-  updatedAt: Date;
+  declare updatedAt: Date;
 
   @BelongsTo(() => User)
   user: User; // Associação com User

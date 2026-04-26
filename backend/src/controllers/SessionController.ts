@@ -21,7 +21,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     group: ["language"]
   });
 
-  const availableLanguages = langs.map(l => l.language.replace(/_/g, "-"));
+  const availableLanguages = langs
+    .map(l => l.language?.replace(/_/g, "-"))
+    .filter(l => !!l);
 
   const language = (req.acceptsLanguages(availableLanguages) || null)?.replace(
     /-/g,

@@ -7,18 +7,18 @@ import { Table, Column, Model, Index } from "sequelize-typescript";
 class Translation extends Model {
   @Index("index_language")
   @Column({ primaryKey: true })
-  language: string;
+  declare language: string;
 
   @Index("index_namespace")
   @Column({ primaryKey: true })
-  namespace: string;
+  declare namespace: string;
 
   @Index("index_key")
   @Column({ primaryKey: true })
-  key: string;
+  declare key: string;
 
   @Column
-  value: string;
+  declare value: string;
 }
 
 export default Translation;

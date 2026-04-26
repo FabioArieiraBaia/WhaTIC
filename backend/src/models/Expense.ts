@@ -5,31 +5,31 @@ import {
   UpdatedAt,
   Model,
   PrimaryKey,
+  AutoIncrement,
   ForeignKey,
   BelongsTo,
-  AutoIncrement
+  DataType
 } from "sequelize-typescript";
-
 import Company from "./Company";
 
 @Table
-class Setting extends Model<Setting> {
+class Expense extends Model<Expense> {
   @PrimaryKey
   @AutoIncrement
   @Column
   declare id: number;
 
   @Column
-  declare key: string;
+  declare description: string;
+
+  @Column(DataType.DECIMAL(10, 2))
+  declare value: number;
 
   @Column
-  declare value: string;
+  declare expenseDate: Date;
 
-  @CreatedAt
-  declare createdAt: Date;
-
-  @UpdatedAt
-  declare updatedAt: Date;
+  @Column
+  declare category: string;
 
   @ForeignKey(() => Company)
   @Column
@@ -37,6 +37,12 @@ class Setting extends Model<Setting> {
 
   @BelongsTo(() => Company)
   company: Company;
+
+  @CreatedAt
+  declare createdAt: Date;
+
+  @UpdatedAt
+  declare updatedAt: Date;
 }
 
-export default Setting;
+export default Expense;

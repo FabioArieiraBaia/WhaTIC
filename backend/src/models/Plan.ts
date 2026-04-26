@@ -16,37 +16,37 @@ class Plan extends Model<Plan> {
   @PrimaryKey
   @AutoIncrement
   @Column
-  id: number;
+  declare id: number;
 
   @AllowNull(false)
   @Unique
   @Column
-  name: string;
+  declare name: string;
 
   @Column
-  users: number;
+  declare users: number;
 
   @Column
-  connections: number;
+  declare connections: number;
 
   @Column
-  queues: number;
+  declare queues: number;
 
   @Column
-  value: number;
+  declare value: number;
 
   @Column
-  currency: string;
+  declare currency: string;
 
   @CreatedAt
-  createdAt: Date;
+  declare createdAt: Date;
 
   @UpdatedAt
-  updatedAt: Date;
+  declare updatedAt: Date;
 
   @Default(true)
   @Column
-  isPublic: boolean;
+  declare isPublic: boolean;
 }
 
 export default Plan;

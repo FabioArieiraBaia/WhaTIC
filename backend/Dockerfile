@@ -1,28 +1,24 @@
-# Stage 1: Build the application
-FROM node:20 AS build
-
-WORKDIR /usr/src/app
+FROM node:20-alpine
+RUN apk add --no-cache redis
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
 COPY . .
-
-RUN npm ci && npm run generate:i18nkeys && npm run build
-
-# Stage 2: Create the final image without source files
-FROM node:20-slim
-
-ARG TICKETZ_REGISTRY_URL
-
-WORKDIR /usr/src/app
-
-# Copy only the necessary build artifacts from the build stage
-COPY --from=build /usr/src/app/dist ./dist
-COPY --from=build /usr/src/app/node_modules ./node_modules
-COPY --from=build /usr/src/app/package.json ./package.json
-COPY --from=build /usr/src/app/scripts ./scripts
-
-ENV NODE_ENV=production
-ENV TICKETZ_REGISTRY_URL=${TICKETZ_REGISTRY_URL}
-
+RUN npm run build
 EXPOSE 8080
+ENV PORT=8080
+ENV NODE_ENV=production
+ENV DB_HOST=34.61.204.112
+ENV DB_NAME=whatic
+ENV DB_USER=postgres
+ENV DB_PASS=Whatic_password_123@
+ENV DB_DIALECT=postgres
+ENV JWT_SECRET=ticketz_pro_secret
+ENV JWT_REFRESH_SECRET=ticketz_pro_refresh_secret
+ENV BACKEND_URL=https://whatic-api-315750790111.us-central1.run.app
+ENV FRONTEND_URL=https://whatic-frontend-315750790111.us-central1.run.app
+ENV REDIS_URI=redis://127.0.0.1:6379
+ENV REDIS_OPT_PORT=6379
 
-CMD npx sequelize db:migrate --config dist/config/database.js --migrations-path dist/database/migrations \
-  && node dist/server.js
+# Inicia o Redis sem disco e depois a aplicação
+CMD redis-server --protected-mode no --save "" --appendonly no & sleep 4 && npx sequelize-cli db:migrate && node dist/server.js

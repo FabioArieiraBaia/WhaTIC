@@ -111,12 +111,15 @@ const useAuth = () => {
         (s) => s.key === "campaignsEnabled"
       );
       if (setting && setting.value === "true") {
-        localStorage.setItem("cshow", null); //regra pra exibir campanhas
+        localStorage.setItem("cshow", "true"); //regra pra exibir campanhas
       }
+    } else if (data.user.profile === "admin") {
+      // Fallback for admin if settings are missing
+      localStorage.setItem("cshow", "true");
     }
 
     moment.locale('pt-br');
-    const dueDate = data.user.company.dueDate;
+    const dueDate = data.user.company?.dueDate;
     const hoje = moment(moment()).format("DD/MM/yyyy");
     const vencimento = moment(dueDate).format("DD/MM/yyyy");
 

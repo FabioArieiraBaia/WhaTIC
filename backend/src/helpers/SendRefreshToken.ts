@@ -6,7 +6,7 @@ export const SendRefreshToken = (res: Response, token: string): void => {
     expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
   };
 
-  if (process.env.BACKEND_URL.startsWith("https:")) {
+  if (process.env.BACKEND_URL && process.env.BACKEND_URL.startsWith("https:")) {
     cookieOptions.sameSite = "none";
     cookieOptions.secure = true;
   }

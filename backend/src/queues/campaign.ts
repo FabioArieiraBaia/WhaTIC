@@ -22,6 +22,7 @@ import OutOfTicketMessage from "../models/OutOfTicketMessages";
 import { Session } from "../libs/wbot";
 import Product from "../models/Product";
 import { GenerateCampaignAiMessage } from "../services/CampaignService/GenerateCampaignAiMessage";
+import { handleMessage } from "../services/WbotServices/wbotMessageListener";
 
 const connection = process.env.REDIS_URI || "";
 export const campaignQueue = new Queue("CampaignQueue", connection);
@@ -45,12 +46,12 @@ async function handleVerifyCampaigns() {
   const campaigns: { id: number; scheduledAt: string }[] =
     await sequelize.query(
       `select id, "scheduledAt" from "Campaigns" c
-    where "scheduledAt" between now() and now() + '1 hour'::interval and status = 'PROGRAMADA'`,
+    where "scheduledAt" <= now() + '1 hour'::interval and status = 'PROGRAMADA'`,
       { type: QueryTypes.SELECT }
     );
 
   if (campaigns.length) {
-    logger.info(`Campanhas encontradas: ${campaigns.length}`);
+    logger.info(`Campanhas encontradas para processar: ${campaigns.length}`);
   }
   campaigns.forEach(campaign => {
     try {
@@ -87,8 +88,7 @@ async function getCampaign(id: number) {
           {
             model: ContactListItem,
             as: "contacts",
-            attributes: ["id", "name", "number", "email", "isWhatsappValid"],
-            where: { isWhatsappValid: true }
+            attributes: ["id", "name", "number", "email", "isWhatsappValid"]
           }
         ]
       },
@@ -111,6 +111,14 @@ async function getCampaign(id: number) {
 }
 
 async function getSettings(campaign) {
+  if (!campaign || !campaign.companyId) {
+    return {
+      messageInterval: 20,
+      longerIntervalAfter: 20,
+      greaterInterval: 60,
+      variables: []
+    };
+  }
   const settings = await CampaignSetting.findAll({
     where: { companyId: campaign.companyId },
     attributes: ["key", "value"]
@@ -323,41 +331,55 @@ async function handleProcessCampaign(job) {
     const { id }: ProcessCampaignData = job.data;
     let { delay }: ProcessCampaignData = job.data;
     const campaign = await getCampaign(id);
-    const settings = await getSettings(campaign);
-    if (campaign) {
-      const { contacts } = campaign.contactList;
-      const messages = getCampaignValidMessages(campaign);
-      const confirmationMessages = campaign.confirmation
-        ? getCampaignValidConfirmationMessages(campaign)
-        : null;
-      if (isArray(contacts)) {
-        let index = 0;
-        contacts.forEach(contact => {
-          prepareContact(
-            campaign,
-            settings.variables,
-            contact,
-            delay,
-            messages,
-            confirmationMessages
-          ).then(() => {
-            logger.info(
-              `Registro enviado pra fila de disparo: Campanha=${campaign.id};Contato=${contact.name};Delay=${delay}`
-            );
-          });
+    
+    if (!campaign) {
+      logger.error(`Campanha ${id} não encontrada para processamento`);
+      return;
+    }
 
-          index += 1;
-          if (index % settings.longerIntervalAfter === 0) {
-            // intervalo maior após intervalo configurado de mensagens
-            delay += parseToMilliseconds(settings.greaterInterval);
-          } else {
-            delay += parseToMilliseconds(
-              randomValue(0, settings.messageInterval)
-            );
-          }
+    if (!campaign.contactList) {
+      logger.error(`Campanha ${id} não possui uma lista de contatos vinculada ou a lista está vazia`);
+      await campaign.update({ status: "CANCELADA" });
+      return;
+    }
+
+    const settings = await getSettings(campaign);
+    const { contacts } = campaign.contactList;
+    const messages = getCampaignValidMessages(campaign);
+    const confirmationMessages = campaign.confirmation
+      ? getCampaignValidConfirmationMessages(campaign)
+      : null;
+    
+    if (isArray(contacts) && contacts.length > 0) {
+      let index = 0;
+      contacts.forEach(contact => {
+        prepareContact(
+          campaign,
+          settings.variables,
+          contact,
+          delay,
+          messages,
+          confirmationMessages
+        ).then(() => {
+          logger.info(
+            `Registro enviado pra fila de disparo: Campanha=${campaign.id};Contato=${contact.name};Delay=${delay}`
+          );
         });
-        await campaign.update({ status: "EM_ANDAMENTO" });
-      }
+
+        index += 1;
+        if (index % settings.longerIntervalAfter === 0) {
+          // intervalo maior após intervalo configurado de mensagens
+          delay += parseToMilliseconds(settings.greaterInterval);
+        } else {
+          delay += parseToMilliseconds(
+            randomValue(0, settings.messageInterval)
+          );
+        }
+      });
+      await campaign.update({ status: "EM_ANDAMENTO" });
+    } else {
+      logger.warn(`Campanha ${id} não possui contatos válidos para disparo`);
+      await campaign.update({ status: "FINALIZADA" });
     }
   } catch (err) {
     logger.error({ message: err?.message }, "Error processing campaign");
@@ -418,9 +440,12 @@ async function handleDispatchCampaign(job) {
     const chatId = `${campaignShipping.number}@s.whatsapp.net`;
 
     if (campaign.confirmation && campaignShipping.confirmation === null) {
-      await sendCampaignMessage(campaign.whatsappId, wbot, chatId, {
+      const sentConfirmation = await sendCampaignMessage(campaign.whatsappId, wbot, chatId, {
         text: campaignShipping.confirmationMessage
       });
+      if (sentConfirmation) {
+        await handleMessage(sentConfirmation, wbot, campaign.companyId);
+      }
       await campaignShipping.update({ confirmationRequestedAt: moment() });
     } else {
       let body = campaignShipping.message;
@@ -437,9 +462,13 @@ async function handleDispatchCampaign(job) {
         }
       }
 
-      await sendCampaignMessage(campaign.whatsappId, wbot, chatId, {
+      const sentMsg = await sendCampaignMessage(campaign.whatsappId, wbot, chatId, {
         text: body
       });
+      if (sentMsg) {
+        await handleMessage(sentMsg, wbot, campaign.companyId);
+      }
+      
       if (campaign.mediaPath) {
         const filePath = path.resolve("public", campaign.mediaPath);
         const content = await getMessageFileOptions(
@@ -447,7 +476,10 @@ async function handleDispatchCampaign(job) {
           filePath
         );
         if (Object.keys(content).length) {
-          await sendCampaignMessage(campaign.whatsappId, wbot, chatId, content);
+          const sentMedia = await sendCampaignMessage(campaign.whatsappId, wbot, chatId, content);
+          if (sentMedia) {
+            await handleMessage(sentMedia, wbot, campaign.companyId);
+          }
         }
       }
       await campaignShipping.update({ deliveredAt: moment() });

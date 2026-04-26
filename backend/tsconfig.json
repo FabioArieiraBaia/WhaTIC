@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es2020",
+    "target": "ESNext",
     "module": "commonjs",
     "outDir": "./dist",
     "strict": false,
@@ -12,5 +12,11 @@
     "forceConsistentCasingInFileNames": true,
     "typeRoots": ["./node_modules/@types", "./src/@types"],
     "resolveJsonModule": true,
-  }
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "lib": ["ESNext"],
+    "types": ["node"],
+    "useDefineForClassFields": false
+  },
+  "exclude": ["node_modules", "dist", "scratch"]
 }

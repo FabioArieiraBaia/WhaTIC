@@ -19,5 +19,11 @@ module.exports = {
   username: process.env.DB_USER,
   password: process.env.DB_PASS,
   logging: process.env.DB_DEBUG && console.log,
-  seederStorage: "sequelize"
+  seederStorage: "sequelize",
+  dialectOptions: {
+    ssl: process.env.NODE_ENV === "production" ? {
+      require: true,
+      rejectUnauthorized: false
+    } : false
+  }
 };

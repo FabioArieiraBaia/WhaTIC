@@ -29,46 +29,46 @@ class Company extends Model<Company> {
   @PrimaryKey
   @AutoIncrement
   @Column
-  id: number;
+  declare id: number;
 
   @Column
-  name: string;
+  declare name: string;
 
   @Column
-  phone: string;
+  declare phone: string;
 
   @Column
-  email: string;
+  declare email: string;
 
   @Column
-  status: boolean;
+  declare status: boolean;
 
   @Column
-  dueDate: string;
+  declare dueDate: string;
 
   @Column
-  recurrence: string;
+  declare recurrence: string;
 
   @Column({
     type: DataType.JSONB
   })
-  schedules: OpenHoursData;
+  declare schedules: OpenHoursData;
 
   @ForeignKey(() => Plan)
   @Column
-  planId: number;
+  declare planId: number;
 
   @BelongsTo(() => Plan)
   plan: Plan;
 
   @Column
-  language: string;
+  declare language: string;
 
   @CreatedAt
-  createdAt: Date;
+  declare createdAt: Date;
 
   @UpdatedAt
-  updatedAt: Date;
+  declare updatedAt: Date;
 
   @HasMany(() => User, {
     onUpdate: "CASCADE",

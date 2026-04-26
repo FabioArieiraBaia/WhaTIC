@@ -28,40 +28,40 @@ class User extends Model<User> {
   @PrimaryKey
   @AutoIncrement
   @Column
-  id: number;
+  declare id: number;
 
   @Column
-  name: string;
+  declare name: string;
 
   @Column
-  email: string;
+  declare email: string;
 
   @Column(DataType.VIRTUAL)
-  password: string;
+  declare password: string;
 
   @Column
-  passwordHash: string;
+  declare passwordHash: string;
 
   @Default(0)
   @Column
-  tokenVersion: number;
+  declare tokenVersion: number;
 
   @Default("admin")
   @Column
-  profile: string;
+  declare profile: string;
 
   @Column
-  super: boolean;
+  declare super: boolean;
 
   @CreatedAt
-  createdAt: Date;
+  declare createdAt: Date;
 
   @UpdatedAt
-  updatedAt: Date;
+  declare updatedAt: Date;
 
   @ForeignKey(() => Company)
   @Column
-  companyId: number;
+  declare companyId: number;
 
   @BelongsTo(() => Company)
   company: Company;

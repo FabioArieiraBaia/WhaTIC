@@ -45,6 +45,7 @@ import Product from "../models/Product";
 import CampaignProduct from "../models/CampaignProduct";
 import ContactPurchase from "../models/ContactPurchase";
 import ServiceOrder from "../models/ServiceOrder";
+import Expense from "../models/Expense";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const dbConfig = require("../config/database");
@@ -97,7 +98,8 @@ const models = [
   Product,
   CampaignProduct,
   ContactPurchase,
-  ServiceOrder
+  ServiceOrder,
+  Expense
 ];
 
 sequelize.addModels(models);

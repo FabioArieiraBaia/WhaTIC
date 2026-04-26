@@ -35,7 +35,9 @@ export async function getUniqueLanguages() {
     attributes: ["language"],
     group: ["language"]
   });
-  return languages.map((entry: any) => entry.language);
+  return languages
+    .map((entry: any) => entry.language)
+    .filter((lang: any) => typeof lang === "string" && lang.length > 0);
 }
 
 export async function initializeI18n() {
@@ -44,7 +46,13 @@ export async function initializeI18n() {
     "defaultLanguage",
     process.env.DEFAULT_LANGUAGE || "en"
   );
-  const languages = await getUniqueLanguages();
+  let languages = await getUniqueLanguages();
+  
+  // Ensure at least one language is supported to avoid i18next crash
+  if (languages.length === 0) {
+    languages = ["en", "pt-BR", "es"];
+  }
+
   logger.trace({ languages }, "i18n: Unique languages found");
   return i18n.init({
     fallbackLng: "en",
@@ -52,7 +60,10 @@ export async function initializeI18n() {
     defaultNS: "backend",
     backend: {},
     supportedLngs: languages,
-    preload: languages
+    preload: languages,
+    interpolation: {
+      escapeValue: false
+    }
   });
 }
 
