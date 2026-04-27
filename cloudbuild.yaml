@@ -34,7 +34,7 @@ steps:
       - 'managed'
       - '--allow-unauthenticated'
       - '--set-env-vars'
-      - 'FRONTEND_URL=https://whatic-app-315750790111.us-central1.run.app'
+      - 'FRONTEND_URL=https://whatic-frontend-315750790111.us-central1.run.app'
 
   # Deploy Frontend to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -42,7 +42,7 @@ steps:
     args:
       - 'run'
       - 'deploy'
-      - 'whatic-app'
+      - 'whatic-frontend'
       - '--image'
       - 'us-central1-docker.pkg.dev/$PROJECT_ID/whatic/frontend:latest'
       - '--region'
