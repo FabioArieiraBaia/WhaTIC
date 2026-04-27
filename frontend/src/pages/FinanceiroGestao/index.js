@@ -260,7 +260,7 @@ const FinanceiroGestao = () => {
             </Typography>
             <div className={classes.chartContainer}>
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data.chartData}>
+                <AreaChart data={data?.chartData || []}>
                   <defs>
                     <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8}/>
@@ -367,7 +367,7 @@ const FinanceiroGestao = () => {
                     </TableCell>
                   </TableRow>
                 ))}
-                {data.recentExpenses.length === 0 && (
+                {data?.recentExpenses?.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={3} align="center">Nenhuma despesa registrada</TableCell>
                   </TableRow>

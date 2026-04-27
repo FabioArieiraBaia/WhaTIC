@@ -1,7 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import Contact from "../../models/Contact";
 import Product from "../../models/Product";
-import Testimonial from "../../models/Testimonial";
 import Setting from "../../models/Setting";
 
 export const GeminiService = async (
@@ -15,14 +14,16 @@ export const GeminiService = async (
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
   const products = await Product.findAll({ where: { companyId } });
-  const testimonials = await Testimonial.findAll({ where: { companyId } });
   
   const settings = await Setting.findAll({ where: { companyId } });
   const aiName = settings.find(s => s.key === "aiName")?.value || "Assistente Virtual";
   const aiContext = settings.find(s => s.key === "aiContext")?.value || "";
 
   const productsText = products.map(p => `ID: ${p.id} - Nome: ${p.name} - Preço: R$ ${p.price} - Descrição: ${p.description}`).join("\n");
-  const testimonialsText = testimonials.map(t => `Cliente: ${t.name} - Depoimento: ${t.description}`).join("\n");
+  const testimonialsText = products
+    .filter(p => p.testimonials)
+    .map(p => `Produto: ${p.name} - Depoimentos: ${p.testimonials}`)
+    .join("\n");
 
   const systemPrompt = `
 Você é ${aiName}, um assistente virtual inteligente e proativo da WhaTIC.
