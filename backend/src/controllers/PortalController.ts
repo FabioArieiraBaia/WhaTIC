@@ -8,6 +8,8 @@ import Whatsapp from "../models/Whatsapp";
 import CreateMessageService from "../services/MessageServices/CreateMessageService";
 import FindOrCreateTicketService from "../services/TicketServices/FindOrCreateTicketService";
 import AppError from "../errors/AppError";
+import { formatProductUrls, getFullUrl } from "../helpers/FormatProductUrls";
+import { uploadToGCS } from "../helpers/UploadToGCS";
 
 export const login = async (req: Request, res: Response): Promise<Response> => {
   const { number } = req.body;
@@ -62,7 +64,15 @@ export const listOrders = async (req: Request, res: Response): Promise<Response>
 
   console.log(`[Portal] Found ${orders.length} orders. Sample product PIX:`, orders[0]?.product?.pixImageUrl);
 
-  return res.json(orders);
+  const processedOrders = orders.map(order => {
+    const o = order.toJSON() as any;
+    if (o.product) {
+      o.product = formatProductUrls(o.product);
+    }
+    return o;
+  });
+
+  return res.json(processedOrders);
 };
 
 export const approveOrder = async (req: Request, res: Response): Promise<Response> => {
@@ -120,7 +130,7 @@ export const listProducts = async (req: Request, res: Response): Promise<Respons
     order: [["name", "ASC"]]
   });
 
-  return res.json(products);
+  return res.json(products.map(formatProductUrls));
 };
 
 export const createOrder = async (req: Request, res: Response): Promise<Response> => {
@@ -203,8 +213,10 @@ export const uploadProof = async (req: Request, res: Response): Promise<Response
 
       if (whatsapp) {
         const { ticket } = await FindOrCreateTicketService(contact, whatsapp.id, companyId);
-        const backendUrl = process.env.BACKEND_URL || "http://localhost:8080";
-        const proofLink = `${backendUrl}/public/${file.filename}`;
+        
+        // Upload to GCS
+        const uploadedPath = await uploadToGCS(file);
+        const proofLink = getFullUrl(uploadedPath);
         
         const message = `*🔍 COMPROVANTE PARA ANÁLISE*\n\nO cliente *${contact.name}* enviou o comprovante do pedido *#${order.id}*.\n\n*Status:* Alterado para REVISÃO.\n*Ver comprovante:* ${proofLink}\n\n_Confira o pagamento e mude o status para PAGO para notificar o cliente._`;
 

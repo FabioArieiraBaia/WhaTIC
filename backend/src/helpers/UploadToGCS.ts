@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import { logger } from "../utils/logger";
 
-export const uploadToGCS = async (file: Express.Multer.File): Promise<string> => {
+export const uploadToGCS = async (file: Express.Multer.File, folder: string = "public"): Promise<string> => {
   const storageType = process.env.STORAGE_TYPE || "local";
   const bucketName = process.env.GCS_BUCKET;
 
@@ -14,7 +14,7 @@ export const uploadToGCS = async (file: Express.Multer.File): Promise<string> =>
   try {
     const storage = new Storage();
     const bucket = storage.bucket(bucketName);
-    const destination = `products/${file.filename}`;
+    const destination = `${folder}/${file.filename}`;
 
     await bucket.upload(file.path, {
       destination,

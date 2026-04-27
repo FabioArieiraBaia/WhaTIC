@@ -3,28 +3,7 @@ import { getIO } from "../libs/socket";
 import AppError from "../errors/AppError";
 import Product from "../models/Product";
 import { uploadToGCS } from "../helpers/UploadToGCS";
-
-const formatProductUrls = (product: Product) => {
-  const p = product.toJSON() as any;
-  const bucketName = process.env.GCS_BUCKET;
-  const storageType = process.env.STORAGE_TYPE || "local";
-  const gcsBaseUrl = `https://storage.googleapis.com/${bucketName}/`;
-
-  if (storageType === "gcs" && bucketName) {
-    if (p.imageUrl && !p.imageUrl.startsWith("http")) p.imageUrl = `${gcsBaseUrl}${p.imageUrl}`;
-    if (p.testimonialAudioUrl && !p.testimonialAudioUrl.startsWith("http")) p.testimonialAudioUrl = `${gcsBaseUrl}${p.testimonialAudioUrl}`;
-    if (p.testimonialImageUrl && !p.testimonialImageUrl.startsWith("http")) p.testimonialImageUrl = `${gcsBaseUrl}${p.testimonialImageUrl}`;
-    if (p.pixImageUrl && !p.pixImageUrl.startsWith("http")) p.pixImageUrl = `${gcsBaseUrl}${p.pixImageUrl}`;
-  } else if (p.imageUrl && !p.imageUrl.startsWith("http")) {
-    // Fallback for local storage
-    const backendUrl = process.env.BACKEND_URL || "http://localhost:8080";
-    if (p.imageUrl) p.imageUrl = `${backendUrl}/public/${p.imageUrl}`;
-    if (p.testimonialAudioUrl) p.testimonialAudioUrl = `${backendUrl}/public/${p.testimonialAudioUrl}`;
-    if (p.testimonialImageUrl) p.testimonialImageUrl = `${backendUrl}/public/${p.testimonialImageUrl}`;
-    if (p.pixImageUrl) p.pixImageUrl = `${backendUrl}/public/${p.pixImageUrl}`;
-  }
-  return p;
-};
+import { formatProductUrls } from "../helpers/FormatProductUrls";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
@@ -45,16 +24,16 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   if (files) {
     if (files.image) {
-      productData.imageUrl = await uploadToGCS(files.image[0]);
+      productData.imageUrl = await uploadToGCS(files.image[0], "products");
     }
     if (files.testimonialAudio) {
-      productData.testimonialAudioUrl = await uploadToGCS(files.testimonialAudio[0]);
+      productData.testimonialAudioUrl = await uploadToGCS(files.testimonialAudio[0], "products");
     }
     if (files.testimonialImage) {
-      productData.testimonialImageUrl = await uploadToGCS(files.testimonialImage[0]);
+      productData.testimonialImageUrl = await uploadToGCS(files.testimonialImage[0], "products");
     }
     if (files.pixImage) {
-      productData.pixImageUrl = await uploadToGCS(files.pixImage[0]);
+      productData.pixImageUrl = await uploadToGCS(files.pixImage[0], "products");
     }
   }
 
@@ -103,16 +82,16 @@ export const update = async (
 
   if (files) {
     if (files.image) {
-      productData.imageUrl = await uploadToGCS(files.image[0]);
+      productData.imageUrl = await uploadToGCS(files.image[0], "products");
     }
     if (files.testimonialAudio) {
-      productData.testimonialAudioUrl = await uploadToGCS(files.testimonialAudio[0]);
+      productData.testimonialAudioUrl = await uploadToGCS(files.testimonialAudio[0], "products");
     }
     if (files.testimonialImage) {
-      productData.testimonialImageUrl = await uploadToGCS(files.testimonialImage[0]);
+      productData.testimonialImageUrl = await uploadToGCS(files.testimonialImage[0], "products");
     }
     if (files.pixImage) {
-      productData.pixImageUrl = await uploadToGCS(files.pixImage[0]);
+      productData.pixImageUrl = await uploadToGCS(files.pixImage[0], "products");
     }
   }
 

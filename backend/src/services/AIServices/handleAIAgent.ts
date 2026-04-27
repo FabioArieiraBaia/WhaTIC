@@ -21,7 +21,23 @@ const downloadFromGCS = async (mediaPath: string): Promise<string> => {
   
   const storage = new Storage();
   const bucket = storage.bucket(bucketName);
-  const file = bucket.file(mediaPath);
+  
+  // Try with 'products/' prefix if it's a product asset and doesn't have it
+  let file = bucket.file(mediaPath);
+  let [exists] = await file.exists();
+  
+  if (!exists && !mediaPath.startsWith("products/")) {
+    file = bucket.file(`products/${mediaPath}`);
+    [exists] = await file.exists();
+  }
+
+  if (!exists && !mediaPath.startsWith("proofs/")) {
+    // Try in 'proofs/' for payment proofs
+    file = bucket.file(`proofs/${mediaPath}`);
+    [exists] = await file.exists();
+  }
+  
+  if (!exists) throw new Error(`Object ${mediaPath} not found in bucket ${bucketName}`);
   
   const tempPath = path.join(os.tmpdir(), path.basename(mediaPath));
   await file.download({ destination: tempPath });
