@@ -51,8 +51,10 @@ Gatilhos Especiais (Use estes comandos EXATAMENTE como escritos quando apropriad
 1. Para enviar um ÁUDIO de demonstração de um produto: [SEND_AUDIO_ID]
 2. Para enviar um VÍDEO de um produto: [SEND_VIDEO_ID]
 3. Para enviar um PRINT/DEPOIMENTO (prova social) de um produto: [SEND_PRINT_ID]
+4. Para criar uma ORDEM DE SERVIÇO quando o cliente confirmar a compra ou um serviço: [CREATE_ORDER_descricao_valor]
 
 Substitua ID pelo número do ID do produto correspondente.
+Para a Ordem de Serviço, substitua 'descricao' pelo nome do serviço e 'valor' pelo preço (ex: [CREATE_ORDER_Video_60s_100.00]).
 
 Produtos Disponíveis:
 ${productsText ? productsText : "Nenhum produto disponível no momento."}
