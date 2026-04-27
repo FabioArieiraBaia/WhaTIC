@@ -12,20 +12,21 @@ export const GeminiService = async (
   history: any[] = []
 ): Promise<string> => {
   const settings = await Setting.findAll({ where: { companyId } });
-  const geminiKey = settings.find(s => s.key === "geminiKey" || s.key === "geminiApiKey")?.value || "";
+  const geminiKey = settings.find(s => s.key === "geminiApiKey")?.value || "";
   
   if (!geminiKey) {
     logger.error(`[GeminiService] No API Key found for company ${companyId}`);
-    return "Desculpe, meu sistema de inteligência está temporariamente indisponível (chave ausente).";
+    return "Desculpe, meu sistema de inteligência está temporariamente indisponível (chave ausente no painel).";
   }
 
+  const aiAgentModel = settings.find(s => s.key === "aiAgentModel")?.value || "gemini-1.5-pro";
   const genAI = new GoogleGenerativeAI(geminiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+  const model = genAI.getGenerativeModel({ model: aiAgentModel });
 
   const products = await Product.findAll({ where: { companyId } });
   
-  const aiName = settings.find(s => s.key === "aiName")?.value || "Assistente Virtual";
-  const aiContext = settings.find(s => s.key === "aiContext")?.value || "";
+  const aiName = settings.find(s => s.key === "aiAgentName")?.value || "Assistente Virtual";
+  const aiContext = settings.find(s => s.key === "aiAgentPrompt")?.value || "";
 
   const productsText = products.map(p => `ID: ${p.id} - Nome: ${p.name} - Preço: R$ ${p.price} - Descrição: ${p.description}`).join("\n");
   const testimonialsText = products
