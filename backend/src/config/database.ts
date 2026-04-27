@@ -21,7 +21,7 @@ module.exports = {
   logging: process.env.DB_DEBUG && console.log,
   seederStorage: "sequelize",
   dialectOptions: {
-    ssl: process.env.NODE_ENV === "production" ? {
+    ssl: (process.env.NODE_ENV === "production" || process.env.DB_SSL === "true") ? {
       require: true,
       rejectUnauthorized: false
     } : false
