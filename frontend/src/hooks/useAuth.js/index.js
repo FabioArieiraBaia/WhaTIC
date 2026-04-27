@@ -61,8 +61,10 @@ const useAuth = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+    const isPortal = window.location.pathname.startsWith("/portal");
+
     (async () => {
-      if (token) {
+      if (token && !isPortal) {
         try {
           const { data } = await api.post("/auth/refresh_token");
           api.defaults.headers.Authorization = `Bearer ${data.token}`;
