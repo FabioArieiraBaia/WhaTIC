@@ -35,9 +35,9 @@ async function generateSecretIfNotExists(cacheKey: string): Promise<string> {
 }
 
 const jwtConfig: JwtConfig = {
-  secret: process.env.JWT_SECRET || null,
+  secret: null,
   expiresIn: "15m",
-  refreshSecret: process.env.JWT_REFRESH_SECRET || null,
+  refreshSecret: null,
   refreshExpiresIn: "7d"
 };
 

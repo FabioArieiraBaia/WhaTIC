@@ -2,8 +2,6 @@ import { Request, Response } from "express";
 import { getIO } from "../libs/socket";
 import AppError from "../errors/AppError";
 import Product from "../models/Product";
-import saveMediaToFile from "../helpers/saveMediaFile";
-import fs from "fs";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
@@ -23,24 +21,17 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
   if (files) {
-    for (const [fieldname, fileArray] of Object.entries(files)) {
-      const file = fileArray[0];
-      const mediaPath = await saveMediaToFile({
-        data: fs.readFileSync(file.path),
-        mimetype: file.mimetype,
-        filename: file.filename
-      }, {
-        destination: companyId,
-        persistant: true
-      });
-
-      if (fieldname === "image") productData.imageUrl = mediaPath;
-      if (fieldname === "testimonialAudio") productData.testimonialAudioUrl = mediaPath;
-      if (fieldname === "testimonialImage") productData.testimonialImageUrl = mediaPath;
-      if (fieldname === "pixImage") productData.pixImageUrl = mediaPath;
-      
-      // Cleanup local temp file
-      try { fs.unlinkSync(file.path); } catch (e) {}
+    if (files.image) {
+      productData.imageUrl = files.image[0].filename;
+    }
+    if (files.testimonialAudio) {
+      productData.testimonialAudioUrl = files.testimonialAudio[0].filename;
+    }
+    if (files.testimonialImage) {
+      productData.testimonialImageUrl = files.testimonialImage[0].filename;
+    }
+    if (files.pixImage) {
+      productData.pixImageUrl = files.pixImage[0].filename;
     }
   }
 
@@ -88,24 +79,17 @@ export const update = async (
   const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
   if (files) {
-    for (const [fieldname, fileArray] of Object.entries(files)) {
-      const file = fileArray[0];
-      const mediaPath = await saveMediaToFile({
-        data: fs.readFileSync(file.path),
-        mimetype: file.mimetype,
-        filename: file.filename
-      }, {
-        destination: companyId,
-        persistant: true
-      });
-
-      if (fieldname === "image") productData.imageUrl = mediaPath;
-      if (fieldname === "testimonialAudio") productData.testimonialAudioUrl = mediaPath;
-      if (fieldname === "testimonialImage") productData.testimonialImageUrl = mediaPath;
-      if (fieldname === "pixImage") productData.pixImageUrl = mediaPath;
-      
-      // Cleanup local temp file
-      try { fs.unlinkSync(file.path); } catch (e) {}
+    if (files.image) {
+      productData.imageUrl = files.image[0].filename;
+    }
+    if (files.testimonialAudio) {
+      productData.testimonialAudioUrl = files.testimonialAudio[0].filename;
+    }
+    if (files.testimonialImage) {
+      productData.testimonialImageUrl = files.testimonialImage[0].filename;
+    }
+    if (files.pixImage) {
+      productData.pixImageUrl = files.pixImage[0].filename;
     }
   }
 
@@ -119,6 +103,11 @@ export const update = async (
 
   if (!product) {
     throw new AppError("ERR_NO_PRODUCT_FOUND", 404);
+  }
+
+  // Explicitly check and set PIX image URL if a file was uploaded
+  if (files && files.pixImage) {
+    productData.pixImageUrl = files.pixImage[0].filename;
   }
 
   await product.update(productData);
@@ -155,5 +144,7 @@ export const remove = async (
     productId: id
   });
 
+  return res.status(200).json({ message: "Product deleted" });
+};
   return res.status(200).json({ message: "Product deleted" });
 };
