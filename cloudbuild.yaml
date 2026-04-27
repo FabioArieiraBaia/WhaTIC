@@ -33,7 +33,7 @@ steps:
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
-      - '--set-env-vars'
+      - '--update-env-vars'
       - 'FRONTEND_URL=https://whatic-frontend-315750790111.us-central1.run.app'
 
   # Deploy Frontend to Cloud Run
@@ -50,7 +50,7 @@ steps:
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
-      - '--set-env-vars'
+      - '--update-env-vars'
       - 'REACT_APP_BACKEND_URL=https://whatic-api-315750790111.us-central1.run.app'
 
 images:
