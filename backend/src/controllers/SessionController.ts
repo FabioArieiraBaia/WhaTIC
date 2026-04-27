@@ -53,7 +53,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   return res.status(200).json({
     token,
-    user: serializedUser
+    user: serializedUser,
+    refreshToken
   });
 };
 
@@ -61,7 +62,7 @@ export const update = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const token: string = req.cookies.jrt;
+  const token: string = req.cookies.jrt || req.body.refreshToken;
 
   if (!token) {
     throw new AppError("ERR_UNAUTHORIZED", 401);
@@ -74,7 +75,7 @@ export const update = async (
 
   SendRefreshToken(res, refreshToken);
 
-  return res.json({ token: newToken, user });
+  return res.json({ token: newToken, user, refreshToken });
 };
 
 export const me = async (req: Request, res: Response): Promise<Response> => {

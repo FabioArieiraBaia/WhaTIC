@@ -42,9 +42,11 @@ const useAuth = () => {
       if (error?.response?.status === 403 && !originalRequest._retry) {
         originalRequest._retry = true;
 
-        const { data } = await api.post("/auth/refresh_token");
+        const refreshToken = localStorage.getItem("refreshToken");
+        const { data } = await api.post("/auth/refresh_token", { refreshToken });
         if (data) {
           localStorage.setItem("token", JSON.stringify(data.token));
+          localStorage.setItem("refreshToken", data.refreshToken);
           api.defaults.headers.Authorization = `Bearer ${data.token}`;
         }
         return api(originalRequest);
@@ -66,7 +68,10 @@ const useAuth = () => {
     (async () => {
       if (token && !isPortal) {
         try {
-          const { data } = await api.post("/auth/refresh_token");
+          const refreshToken = localStorage.getItem("refreshToken");
+          const { data } = await api.post("/auth/refresh_token", { refreshToken });
+          localStorage.setItem("token", JSON.stringify(data.token));
+          localStorage.setItem("refreshToken", data.refreshToken);
           api.defaults.headers.Authorization = `Bearer ${data.token}`;
           setIsAuth(true);
           setUser(data.user);
@@ -103,7 +108,8 @@ const useAuth = () => {
   const posLogin = (data, impersonated = false) => {
     const {
       user: { company },
-      token
+      token,
+      refreshToken
     } = data;
 
     const { companyId, userId } = decodeToken(token);
@@ -130,6 +136,7 @@ const useAuth = () => {
     var dias = moment.duration(diff).asDays();
 
     localStorage.setItem("token", JSON.stringify(token));
+    localStorage.setItem("refreshToken", refreshToken);
     localStorage.setItem("companyId", companyId);
     localStorage.setItem("userId", data.user.id);
     localStorage.setItem("companyDueDate", vencimento);
@@ -189,6 +196,7 @@ const useAuth = () => {
       setIsAuth(false);
       setUser({});
       localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
       localStorage.removeItem("companyId");
       localStorage.removeItem("userId");
       localStorage.removeItem("cshow");
