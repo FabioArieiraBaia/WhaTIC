@@ -40,6 +40,14 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(Sentry.Handlers.requestHandler());
 app.get("/public/*", (req, res) => {
+  const storageType = process.env.STORAGE_TYPE || "local";
+  const bucketName = process.env.GCS_BUCKET;
+
+  if (storageType === "gcs" && bucketName) {
+    const publicUrl = `https://storage.googleapis.com/${bucketName}/${req.params[0]}`;
+    return res.redirect(publicUrl);
+  }
+
   const filePath = path.join(uploadConfig.directory, req.params[0]);
   console.log(`[PublicDebug] Request: ${req.params[0]} | Path: ${filePath}`);
   

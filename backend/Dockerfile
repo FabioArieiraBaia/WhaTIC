@@ -18,6 +18,8 @@ ENV JWT_SECRET=ticketz_pro_secret
 ENV JWT_REFRESH_SECRET=ticketz_pro_refresh_secret
 ENV BACKEND_URL=https://whatic-api-315750790111.us-central1.run.app
 ENV FRONTEND_URL=https://whatic-frontend-315750790111.us-central1.run.app
+ENV STORAGE_TYPE=gcs
+ENV GCS_BUCKET=whatic-media-315750790111
 ENV REDIS_URI=redis://127.0.0.1:6379
 ENV REDIS_OPT_PORT=6379
 

@@ -51,14 +51,28 @@ export default async function saveMediaToFile(
 
   relativePath += `${randomId}`;
 
-  const storage = new FileStorage(new LocalStorageAdapter(getPublicPath()));
+  const storageType = process.env.STORAGE_TYPE || "local";
+  const bucketName = process.env.GCS_BUCKET;
+
+  let storage: FileStorage;
+
+  if (storageType === "gcs" && bucketName) {
+    const { Storage } = require("@google-cloud/storage");
+    const { GoogleCloudStorageAdapter } = require("@flystorage/google-cloud-storage");
+    const gcsStorage = new Storage();
+    storage = new FileStorage(new GoogleCloudStorageAdapter(gcsStorage.bucket(bucketName)));
+  } else {
+    storage = new FileStorage(new LocalStorageAdapter(getPublicPath()));
+  }
 
   const mediaPath = `${relativePath}/${media.filename}`;
 
   try {
-    const fullDir = path.join(getPublicPath(), relativePath);
-    if (!fs.existsSync(fullDir)) {
-      fs.mkdirSync(fullDir, { recursive: true });
+    if (storageType !== "gcs") {
+      const fullDir = path.join(getPublicPath(), relativePath);
+      if (!fs.existsSync(fullDir)) {
+        fs.mkdirSync(fullDir, { recursive: true });
+      }
     }
     await storage.write(mediaPath, media.data);
   } catch (error) {
