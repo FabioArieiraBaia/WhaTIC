@@ -68,6 +68,19 @@ const ServiceOrderModal = ({ open, onClose, orderId, contactId }) => {
   };
 
   const [order, setOrder] = useState(initialState);
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const { data } = await api.get("/products");
+        setProducts(data);
+      } catch (err) {
+        toastError(err);
+      }
+    };
+    if (open) fetchProducts();
+  }, [open]);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -150,6 +163,27 @@ const ServiceOrderModal = ({ open, onClose, orderId, contactId }) => {
                     />
                   </FormControl>
                 )}
+
+                <FormControl variant="outlined" className={classes.formControl} margin="dense">
+                  <InputLabel>{i18n.t("Selecionar Produto")}</InputLabel>
+                  <Select
+                    label={i18n.t("Selecionar Produto")}
+                    value=""
+                    onChange={(e) => {
+                      const selected = products.find(p => p.id === e.target.value);
+                      if (selected) {
+                        setFieldValue("description", selected.name);
+                        setFieldValue("value", selected.price);
+                      }
+                    }}
+                  >
+                    {products.map((p) => (
+                      <MenuItem key={p.id} value={p.id}>
+                        {p.name} - R$ {p.price}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
 
                 <FormControl variant="outlined" className={classes.formControl} margin="dense">
                   <InputLabel>{i18n.t("Status")}</InputLabel>
