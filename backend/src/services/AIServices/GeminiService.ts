@@ -2,6 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import Contact from "../../models/Contact";
 import Product from "../../models/Product";
 import Setting from "../../models/Setting";
+import { logger } from "../../utils/logger";
 
 export const GeminiService = async (
   contact: Contact,
@@ -10,12 +11,19 @@ export const GeminiService = async (
   userMessage: string,
   history: any[] = []
 ): Promise<string> => {
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+  const settings = await Setting.findAll({ where: { companyId } });
+  const geminiKey = settings.find(s => s.key === "geminiKey" || s.key === "geminiApiKey")?.value || "";
+  
+  if (!geminiKey) {
+    logger.error(`[GeminiService] No API Key found for company ${companyId}`);
+    return "Desculpe, meu sistema de inteligência está temporariamente indisponível (chave ausente).";
+  }
+
+  const genAI = new GoogleGenerativeAI(geminiKey);
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
   const products = await Product.findAll({ where: { companyId } });
   
-  const settings = await Setting.findAll({ where: { companyId } });
   const aiName = settings.find(s => s.key === "aiName")?.value || "Assistente Virtual";
   const aiContext = settings.find(s => s.key === "aiContext")?.value || "";
 
