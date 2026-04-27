@@ -11,7 +11,7 @@ steps:
 
   # Build Frontend
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '--build-arg', 'REACT_APP_BACKEND_URL=https://whatic-api-gen-lang-client-0297704847.a.run.app', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/whatic/frontend:$COMMIT_SHA', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/whatic/frontend:latest', './frontend']
+    args: ['build', '--build-arg', 'REACT_APP_BACKEND_URL=https://whatic-api-315750790111.us-central1.run.app', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/whatic/frontend:$COMMIT_SHA', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/whatic/frontend:latest', './frontend']
     env:
       - 'DOCKER_BUILDKIT=1'
 
@@ -48,6 +48,8 @@ steps:
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
+      - '--set-env-vars'
+      - 'REACT_APP_BACKEND_URL=https://whatic-api-315750790111.us-central1.run.app'
 
 images:
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/whatic/backend:latest'
