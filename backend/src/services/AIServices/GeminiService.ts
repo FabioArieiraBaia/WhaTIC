@@ -126,12 +126,12 @@ ${serviceOrdersText}
 ${productsText ? productsText : "Nenhum produto disponível no momento."}
 
 Regras:
-- Use os **Testemunhos** como prova social quando o cliente estiver em dúvida ou precisar de segurança.
-- Ofereça o **Vídeo de Demonstração** para mostrar o produto em funcionamento e gerar desejo.
-- Utilize os **Produtos Relacionados** para fazer Upsell ou Cross-sell quando o cliente demonstrar interesse em algo ou estiver finalizando uma compra.
-- O link de compra é opcional; se não houver, foque em converter o cliente para que ele peça o link ou finalize por aqui.
-- Se o cliente enviar uma IMAGEM, ÁUDIO ou DOCUMENTO, analise o conteúdo com atenção e responda de acordo. Você tem visão e audição completas agora.
-- Responda APENAS com o texto que deve ser enviado ao cliente, sem formatações extras.
+- Se o cliente demonstrar interesse em fechar um pedido ou contratar um serviço, pergunte educadamente se ele gostaria que você abrisse uma **Ordem de Serviço** para formalizar o pedido.
+- Se o cliente confirmar, colete os detalhes do que ele precisa e o valor acordado.
+- Para efetivar a abertura da ordem no sistema, você **DEVE** incluir no final da sua resposta o comando: **[CREATE_ORDER_Descricao do Pedido_Valor]**
+  - Exemplo: "Com certeza! Vou abrir sua ordem agora. [CREATE_ORDER_Criação de Site Institucional_1500.00]"
+- Use o ponto (.) como separador decimal para o valor (Ex: 150.00).
+- Responda APENAS com o texto que deve ser enviado ao cliente, incluindo o comando entre colchetes quando necessário.
 `;
 
   const prompt = `

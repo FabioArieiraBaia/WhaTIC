@@ -270,15 +270,27 @@ const PortalOrders = () => {
                         />
                         
                         {order.product.pixCopiaCola && (
-                          <Box width="100%" mt={3}>
-                            <Typography variant="caption" style={{ color: 'var(--text-muted)' }}>Chave Copia e Cola:</Typography>
-                            <code className="copy-cola">
-                              {order.product.pixCopiaCola}
-                            </code>
+                          <Box width="100%" mt={3} p={2} style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, border: '1px dashed rgba(255,255,255,0.2)' }}>
+                            <Typography variant="caption" style={{ color: 'var(--text-muted)', display: 'block', marginBottom: 8 }}>Chave Copia e Cola:</Typography>
+                            <Box display="flex" alignItems="center" gap={1}>
+                              <code className="copy-cola" style={{ fontSize: '0.8rem', wordBreak: 'break-all', flex: 1 }}>
+                                {order.product.pixCopiaCola}
+                              </code>
+                              <Button 
+                                size="small" 
+                                style={{ color: 'var(--primary)', fontWeight: 700, minWidth: 'auto' }}
+                                onClick={() => {
+                                  navigator.clipboard.writeText(order.product.pixCopiaCola);
+                                  toast.success("Chave PIX copiada!");
+                                }}
+                              >
+                                COPIAR
+                              </Button>
+                            </Box>
                           </Box>
                         )}
 
-                        <Typography variant="h5" color="primary" style={{ marginTop: 20, fontWeight: 800 }}>
+                        <Typography variant="h5" color="primary" style={{ marginTop: 25, fontWeight: 800 }}>
                           Valor: R$ {order.value || order.product.price}
                         </Typography>
 
