@@ -1,7 +1,7 @@
 import Product from "../models/Product";
 
-export const formatProductUrls = (product: Product) => {
-  const p = product.toJSON() as any;
+export const formatProductUrls = (product: any) => {
+  const p = typeof product.toJSON === 'function' ? product.toJSON() : { ...product };
   const bucketName = process.env.GCS_BUCKET;
   const storageType = process.env.STORAGE_TYPE || "local";
   const gcsBaseUrl = `https://storage.googleapis.com/${bucketName}/`;
