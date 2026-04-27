@@ -1,10 +1,12 @@
-import { Ticket } from "../../models/Ticket";
+import Ticket from "../../models/Ticket";
 import Product from "../../models/Product";
 import ServiceOrder from "../../models/ServiceOrder";
 import SendWhatsAppMessage from "../WbotServices/SendWhatsAppMessage";
 import SendWhatsAppMedia from "../WbotServices/SendWhatsAppMedia";
 import path from "path";
 import fs from "fs";
+import { Storage } from "@google-cloud/storage";
+import os from "os";
 
 export interface MediaData {
   base64: string;
@@ -12,28 +14,54 @@ export interface MediaData {
   type: string;
 }
 
+const downloadFromGCS = async (mediaPath: string): Promise<string> => {
+  const bucketName = process.env.GCS_BUCKET;
+  if (!bucketName) throw new Error("GCS_BUCKET not configured");
+  
+  const storage = new Storage();
+  const bucket = storage.bucket(bucketName);
+  const file = bucket.file(mediaPath);
+  
+  const tempPath = path.join(os.tmpdir(), path.basename(mediaPath));
+  await file.download({ destination: tempPath });
+  return tempPath;
+};
+
 const handleAIAgent = async (
   ticket: Ticket,
   response: string
 ): Promise<void> => {
+  const storageType = process.env.STORAGE_TYPE || "local";
   try {
     // Check for [SEND_AUDIO_ID] trigger
     const audioMatch = response.match(/\[SEND_AUDIO_(\d+)\]/);
     if (audioMatch) {
       const productId = audioMatch[1];
       const product = await Product.findByPk(productId);
-      if (product && product.audioUrl) {
-        const filePath = path.join(__dirname, "..", "..", "..", "public", product.audioUrl);
-        if (fs.existsSync(filePath)) {
-          await SendWhatsAppMedia({
-            media: {
-              path: filePath,
-              originalname: product.audioUrl,
-              mimetype: "audio/ogg",
-              size: fs.statSync(filePath).size
-            } as any,
-            ticket
-          });
+      if (product && product.testimonialAudioUrl) {
+        let filePath = "";
+        let isTemp = false;
+        try {
+          if (storageType === "gcs") {
+            filePath = await downloadFromGCS(product.testimonialAudioUrl);
+            isTemp = true;
+          } else {
+            filePath = path.join(__dirname, "..", "..", "..", "public", product.testimonialAudioUrl);
+          }
+
+          if (fs.existsSync(filePath)) {
+            await SendWhatsAppMedia({
+              media: {
+                path: filePath,
+                originalname: product.testimonialAudioUrl,
+                mimetype: "audio/ogg",
+                size: fs.statSync(filePath).size
+              } as any,
+              ticket
+            });
+          }
+        } finally {
+          if (isTemp && fs.existsSync(filePath)) fs.unlinkSync(filePath);
         }
       }
       response = response.replace(/\[SEND_AUDIO_(\d+)\]/g, "");
@@ -45,17 +73,29 @@ const handleAIAgent = async (
       const productId = videoMatch[1];
       const product = await Product.findByPk(productId);
       if (product && product.videoUrl) {
-        const filePath = path.join(__dirname, "..", "..", "..", "public", product.videoUrl);
-        if (fs.existsSync(filePath)) {
-          await SendWhatsAppMedia({
-            media: {
-              path: filePath,
-              originalname: product.videoUrl,
-              mimetype: "video/mp4",
-              size: fs.statSync(filePath).size
-            } as any,
-            ticket
-          });
+        let filePath = "";
+        let isTemp = false;
+        try {
+          if (storageType === "gcs") {
+            filePath = await downloadFromGCS(product.videoUrl);
+            isTemp = true;
+          } else {
+            filePath = path.join(__dirname, "..", "..", "..", "public", product.videoUrl);
+          }
+
+          if (fs.existsSync(filePath)) {
+            await SendWhatsAppMedia({
+              media: {
+                path: filePath,
+                originalname: product.videoUrl,
+                mimetype: "video/mp4",
+                size: fs.statSync(filePath).size
+              } as any,
+              ticket
+            });
+          }
+        } finally {
+          if (isTemp && fs.existsSync(filePath)) fs.unlinkSync(filePath);
         }
       }
       response = response.replace(/\[SEND_VIDEO_(\d+)\]/g, "");
@@ -67,17 +107,29 @@ const handleAIAgent = async (
       const productId = printMatch[1];
       const product = await Product.findByPk(productId);
       if (product && product.testimonialImageUrl) {
-        const filePath = path.join(__dirname, "..", "..", "..", "public", product.testimonialImageUrl);
-        if (fs.existsSync(filePath)) {
-          await SendWhatsAppMedia({
-            media: {
-              path: filePath,
-              originalname: product.testimonialImageUrl,
-              mimetype: "image/png",
-              size: fs.statSync(filePath).size
-            } as any,
-            ticket
-          });
+        let filePath = "";
+        let isTemp = false;
+        try {
+          if (storageType === "gcs") {
+            filePath = await downloadFromGCS(product.testimonialImageUrl);
+            isTemp = true;
+          } else {
+            filePath = path.join(__dirname, "..", "..", "..", "public", product.testimonialImageUrl);
+          }
+
+          if (fs.existsSync(filePath)) {
+            await SendWhatsAppMedia({
+              media: {
+                path: filePath,
+                originalname: product.testimonialImageUrl,
+                mimetype: "image/png",
+                size: fs.statSync(filePath).size
+              } as any,
+              ticket
+            });
+          }
+        } finally {
+          if (isTemp && fs.existsSync(filePath)) fs.unlinkSync(filePath);
         }
       }
       response = response.replace(/\[SEND_PRINT_(\d+)\]/g, "");

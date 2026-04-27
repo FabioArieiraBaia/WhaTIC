@@ -34,7 +34,7 @@ import CreateMessageService, {
 import { logger } from "../../utils/logger";
 import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketService";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
-import { handleAIAgent } from "../AIServices/handleAIAgent";
+import handleAIAgent from "../AIServices/handleAIAgent";
 import UpdateTicketService, {
   UpdateTicketData
 } from "../TicketServices/UpdateTicketService";
