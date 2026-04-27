@@ -221,7 +221,7 @@ const Products = () => {
                 <TableRow key={product.id}>
                   <TableCell align="center">
                     {product.imageUrl ? (
-                      <img src={`${getBackendURL()}/public/${product.imageUrl}`} alt={product.name} style={{ width: 50, height: 50, objectFit: 'cover', borderRadius: 4 }} />
+                      <img src={product.imageUrl} alt={product.name} style={{ width: 50, height: 50, objectFit: 'cover', borderRadius: 4 }} />
                     ) : (
                       <div style={{ width: 50, height: 50, backgroundColor: '#eee', borderRadius: 4, display: 'inline-block' }}></div>
                     )}

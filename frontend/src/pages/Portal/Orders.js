@@ -264,7 +264,7 @@ const PortalOrders = () => {
                       
                       <Box display="flex" flexDirection="column" alignItems="center">
                         <img 
-                          src={`${getBackendURL()}/public/${order.product.pixImageUrl}`} 
+                          src={order.product.pixImageUrl} 
                           alt="PIX QR Code" 
                           style={{ width: 220, height: 220, borderRadius: 12, border: '5px solid white' }} 
                         />

@@ -4,6 +4,28 @@ import AppError from "../errors/AppError";
 import Product from "../models/Product";
 import { uploadToGCS } from "../helpers/UploadToGCS";
 
+const formatProductUrls = (product: Product) => {
+  const p = product.toJSON() as any;
+  const bucketName = process.env.GCS_BUCKET;
+  const storageType = process.env.STORAGE_TYPE || "local";
+  const gcsBaseUrl = `https://storage.googleapis.com/${bucketName}/`;
+
+  if (storageType === "gcs" && bucketName) {
+    if (p.imageUrl && !p.imageUrl.startsWith("http")) p.imageUrl = `${gcsBaseUrl}${p.imageUrl}`;
+    if (p.testimonialAudioUrl && !p.testimonialAudioUrl.startsWith("http")) p.testimonialAudioUrl = `${gcsBaseUrl}${p.testimonialAudioUrl}`;
+    if (p.testimonialImageUrl && !p.testimonialImageUrl.startsWith("http")) p.testimonialImageUrl = `${gcsBaseUrl}${p.testimonialImageUrl}`;
+    if (p.pixImageUrl && !p.pixImageUrl.startsWith("http")) p.pixImageUrl = `${gcsBaseUrl}${p.pixImageUrl}`;
+  } else if (p.imageUrl && !p.imageUrl.startsWith("http")) {
+    // Fallback for local storage
+    const backendUrl = process.env.BACKEND_URL || "http://localhost:8080";
+    if (p.imageUrl) p.imageUrl = `${backendUrl}/public/${p.imageUrl}`;
+    if (p.testimonialAudioUrl) p.testimonialAudioUrl = `${backendUrl}/public/${p.testimonialAudioUrl}`;
+    if (p.testimonialImageUrl) p.testimonialImageUrl = `${backendUrl}/public/${p.testimonialImageUrl}`;
+    if (p.pixImageUrl) p.pixImageUrl = `${backendUrl}/public/${p.pixImageUrl}`;
+  }
+  return p;
+};
+
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
 
@@ -12,7 +34,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     order: [["name", "ASC"]]
   });
 
-  return res.status(200).json(products);
+  return res.status(200).json(products.map(formatProductUrls));
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
@@ -48,10 +70,10 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const io = getIO();
   io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-product`, {
     action: "create",
-    product
+    product: formatProductUrls(product)
   });
 
-  return res.status(200).json(product);
+  return res.status(200).json(formatProductUrls(product));
 };
 
 export const show = async (req: Request, res: Response): Promise<Response> => {
@@ -66,7 +88,7 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
     throw new AppError("ERR_NO_PRODUCT_FOUND", 404);
   }
 
-  return res.status(200).json(product);
+  return res.status(200).json(formatProductUrls(product));
 };
 
 export const update = async (
@@ -111,10 +133,10 @@ export const update = async (
   const io = getIO();
   io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-product`, {
     action: "update",
-    product
+    product: formatProductUrls(product)
   });
 
-  return res.status(200).json(product);
+  return res.status(200).json(formatProductUrls(product));
 };
 
 export const remove = async (
