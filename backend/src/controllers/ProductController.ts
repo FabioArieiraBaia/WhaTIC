@@ -85,6 +85,8 @@ export const update = async (
   const productData = req.body;
   const { companyId } = req.user;
 
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
   if (files) {
     for (const [fieldname, fileArray] of Object.entries(files)) {
       const file = fileArray[0];

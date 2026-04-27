@@ -7,11 +7,12 @@ import path from "path";
 import fs from "fs";
 import { Storage } from "@google-cloud/storage";
 import os from "os";
+import { GeminiService } from "./GeminiService";
+import Message from "../../models/Message";
 
 export interface MediaData {
   base64: string;
-  name: string;
-  type: string;
+  mimeType: string;
 }
 
 const downloadFromGCS = async (mediaPath: string): Promise<string> => {
@@ -28,11 +29,27 @@ const downloadFromGCS = async (mediaPath: string): Promise<string> => {
 };
 
 const handleAIAgent = async (
+  wbot: any,
   ticket: Ticket,
-  response: string
+  bodyMessage: string,
+  mediaData: MediaData | null
 ): Promise<void> => {
   const storageType = process.env.STORAGE_TYPE || "local";
   try {
+    const history = await Message.findAll({
+      where: { ticketId: ticket.id },
+      order: [["createdAt", "DESC"]],
+      limit: 10
+    });
+    
+    let response = await GeminiService(
+      ticket.contact,
+      ticket.id,
+      ticket.companyId,
+      bodyMessage,
+      history.reverse()
+    );
+
     // Check for [SEND_AUDIO_ID] trigger
     const audioMatch = response.match(/\[SEND_AUDIO_(\d+)\]/);
     if (audioMatch) {
