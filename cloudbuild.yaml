@@ -2,6 +2,8 @@ steps:
   # Build Backend
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/whatic/backend:$COMMIT_SHA', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/whatic/backend:latest', './backend']
+    env:
+      - 'DOCKER_BUILDKIT=1'
 
   # Push Backend to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
@@ -10,6 +12,8 @@ steps:
   # Build Frontend
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '--build-arg', 'REACT_APP_BACKEND_URL=https://whatic-api-gen-lang-client-0297704847.a.run.app', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/whatic/frontend:$COMMIT_SHA', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/whatic/frontend:latest', './frontend']
+    env:
+      - 'DOCKER_BUILDKIT=1'
 
   # Push Frontend to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
