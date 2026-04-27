@@ -15,6 +15,36 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/whatic/frontend:latest']
 
+  # Deploy Backend to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'whatic-api'
+      - '--image'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/whatic/backend:latest'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+
+  # Deploy Frontend to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'whatic-app'
+      - '--image'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/whatic/frontend:latest'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+
 images:
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/whatic/backend:latest'
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/whatic/frontend:latest'
