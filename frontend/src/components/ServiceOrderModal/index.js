@@ -20,7 +20,6 @@ import Select from "@material-ui/core/Select";
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
-import ContactSelect from "../ContactSelect";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -55,7 +54,7 @@ const ServiceOrderSchema = Yup.object().shape({
   finalVideoUrl: Yup.string().url("URL inválida").nullable(),
 });
 
-const ServiceOrderModal = ({ open, onClose, orderId, contactId }) => {
+const ServiceOrderModal = ({ open, onClose, orderId }) => {
   const classes = useStyles();
 
   const initialState = {
@@ -63,8 +62,7 @@ const ServiceOrderModal = ({ open, onClose, orderId, contactId }) => {
     description: "",
     videoUrl: "",
     finalVideoUrl: "",
-    value: "",
-    contactId: ""
+    value: ""
   };
 
   const [order, setOrder] = useState(initialState);
@@ -73,10 +71,6 @@ const ServiceOrderModal = ({ open, onClose, orderId, contactId }) => {
     const fetchOrder = async () => {
       if (!orderId) return;
       try {
-        const { data } = await api.get(`/service-orders`); // In our controller listAll returns all, index returns by contact. 
-        // Better to add a show method in backend controller. 
-        // For now I'll search in the list or use a specific endpoint if I add it.
-        // Actually, let's just use the index with ID if I modify it.
         const { data: allOrders } = await api.get("/service-orders");
         const found = allOrders.find(o => o.id === orderId);
         if (found) {
@@ -104,16 +98,8 @@ const ServiceOrderModal = ({ open, onClose, orderId, contactId }) => {
 
   const handleSaveOrder = async (values) => {
     try {
-      if (orderId) {
-        await api.put(`/service-orders/${orderId}`, values);
-        toast.success(i18n.t("Pedido atualizado com sucesso!"));
-      } else {
-        const data = { ...values };
-        if (contactId) data.contactId = contactId;
-        
-        await api.post(`/service-orders`, data);
-        toast.success(i18n.t("Pedido criado com sucesso!"));
-      }
+      await api.put(`/service-orders/${orderId}`, values);
+      toast.success(i18n.t("Pedido atualizado com sucesso!"));
     } catch (err) {
       toastError(err);
     }
@@ -130,7 +116,7 @@ const ServiceOrderModal = ({ open, onClose, orderId, contactId }) => {
         scroll="paper"
       >
         <DialogTitle id="form-dialog-title">
-          {orderId ? `${i18n.t("Gerenciar Pedido")} #${orderId}` : i18n.t("Novo Pedido")}
+          {i18n.t("Gerenciar Pedido")} #{orderId}
         </DialogTitle>
         <Formik
           initialValues={order}
@@ -146,15 +132,6 @@ const ServiceOrderModal = ({ open, onClose, orderId, contactId }) => {
           {({ touched, errors, isSubmitting, values, setFieldValue }) => (
             <Form>
               <DialogContent dividers>
-                {!contactId && !orderId && (
-                  <FormControl variant="outlined" className={classes.formControl} margin="dense">
-                    <ContactSelect
-                      selectedContactId={values.contactId}
-                      onChange={(contact) => setFieldValue("contactId", contact ? contact.id : "")}
-                    />
-                  </FormControl>
-                )}
-
                 <FormControl variant="outlined" className={classes.formControl} margin="dense">
                   <InputLabel>{i18n.t("Status")}</InputLabel>
                   <Select
