@@ -8,6 +8,7 @@ import * as Sentry from "@sentry/node";
 
 import "./database";
 import path from "path";
+import fs from "fs";
 import uploadConfig from "./config/upload";
 import AppError from "./errors/AppError";
 import routes from "./routes";
@@ -40,24 +41,17 @@ app.use(express.json());
 app.use(Sentry.Handlers.requestHandler());
 app.get("/public/*", (req, res) => {
   const filePath = path.join(uploadConfig.directory, req.params[0]);
-
-  if (filePath.endsWith(".aac")) {
-    res.setHeader("Content-Type", "audio/aac");
+  console.log(`[PublicDebug] Request: ${req.params[0]} | Path: ${filePath}`);
+  
+  if (fs.existsSync(filePath)) {
+    console.log(`[PublicDebug] File found! Sending...`);
+    res.sendFile(filePath, (err) => {
+      if (err) console.error(`[PublicDebug] Error sending file:`, err);
+    });
+  } else {
+    console.error(`[PublicDebug] File NOT found: ${filePath}`);
+    res.status(404).send("File not found");
   }
-
-  res.download(filePath, (err: SystemError) => {
-    if (err) {
-      if (err.code === "ENOENT") {
-        res.status(404).end();
-      } else {
-        logger.debug(
-          { err },
-          `Error downloading file ${req.params[0]}: ${err.message}`
-        );
-        res.status(500).end();
-      }
-    }
-  });
 });
 
 app.use((req, _res, next) => {

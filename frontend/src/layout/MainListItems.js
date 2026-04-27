@@ -346,6 +346,11 @@ const MainListItems = (props) => {
                 icon={<ShoppingCartIcon />}
               />
               <ListItemLink
+                to="/service-orders"
+                primary={i18n.t("Pedidos")}
+                icon={<ListIcon />}
+              />
+              <ListItemLink
                 to="/financeiro-gestao"
                 primary={i18n.t("Financeiro")}
                 icon={<LocalAtmIcon />}

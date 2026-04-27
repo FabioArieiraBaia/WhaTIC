@@ -37,11 +37,14 @@ class ServiceOrder extends Model<ServiceOrder> {
   product: Product;
 
   @Column(DataType.TEXT)
-  description: string;
+  declare description: string;
+
+  @Column
+  declare videoUrl: string;
 
   @Default("PENDENTE")
-  @Column(DataType.ENUM("PENDENTE", "EM_ANDAMENTO", "REVISAO", "CONCLUIDO"))
-  status: string;
+  @Column(DataType.ENUM("PENDENTE", "EM_ANDAMENTO", "REVISAO", "AGUARDANDO_PAGAMENTO", "EM_ANALISE", "PAGO", "ENTREGUE", "CONCLUIDO"))
+  declare status: string;
 
   @Default(0)
   @Column(DataType.DECIMAL(10, 2))

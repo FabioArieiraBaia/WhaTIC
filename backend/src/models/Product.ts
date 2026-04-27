@@ -63,7 +63,13 @@ class Product extends Model<Product> {
   relatedProducts: string;
 
   @Column
-  imageUrl: string;
+  declare imageUrl: string;
+
+  @Column
+  declare pixImageUrl: string;
+
+  @Column(DataType.TEXT)
+  declare pixCopiaCola: string;
 
   @Column
   category: string;

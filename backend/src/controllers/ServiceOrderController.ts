@@ -1,8 +1,17 @@
 import { Request, Response } from "express";
+import { Op } from "sequelize";
 import ServiceOrder from "../models/ServiceOrder";
 import Product from "../models/Product";
 import ContactPurchase from "../models/ContactPurchase";
+import Contact from "../models/Contact";
+import Whatsapp from "../models/Whatsapp";
 import AppError from "../errors/AppError";
+import FindOrCreateTicketService from "../services/TicketServices/FindOrCreateTicketService";
+import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
+import CreateMessageService from "../services/MessageServices/CreateMessageService";
+import SendWhatsAppMedia from "../services/WbotServices/SendWhatsAppMedia";
+import path from "path";
+import fs from "fs";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { contactId } = req.params;
@@ -11,6 +20,21 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   const orders = await ServiceOrder.findAll({
     where: { contactId, companyId },
     include: [{ model: Product, attributes: ["id", "name"] }],
+    order: [["createdAt", "DESC"]]
+  });
+
+  return res.status(200).json(orders);
+};
+
+export const listAll = async (req: Request, res: Response): Promise<Response> => {
+  const { companyId } = req.user;
+
+  const orders = await ServiceOrder.findAll({
+    where: { companyId },
+    include: [
+      { model: Product, attributes: ["id", "name"] },
+      "contact"
+    ],
     order: [["createdAt", "DESC"]]
   });
 
@@ -50,7 +74,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 export const update = async (req: Request, res: Response): Promise<Response> => {
   const { id } = req.params;
   const { companyId } = req.user;
-  const { status, description, productId, value } = req.body;
+  const { status, description, productId, value, videoUrl, finalVideoUrl } = req.body;
+  const combinedVideoUrl = `${videoUrl || ""}###${finalVideoUrl || ""}`;
 
   const order = await ServiceOrder.findOne({
     where: { id, companyId }
@@ -61,7 +86,94 @@ export const update = async (req: Request, res: Response): Promise<Response> => 
   }
 
   const oldStatus = order.status;
-  await order.update({ status, description, productId, value });
+  await order.update({ status, description, productId, value, videoUrl: combinedVideoUrl });
+
+  // Notification Process (Separated to not block the response)
+  (async () => {
+    try {
+      const contact = await Contact.findByPk(order.contactId);
+      if (!contact) return;
+
+      // Find any session that is NOT disconnected
+      const whatsapp = await Whatsapp.findOne({
+        where: { 
+          companyId, 
+          status: { [Op.notIn]: ["DISCONNECTED", "qrcode"] } 
+        }
+      });
+
+      if (whatsapp) {
+        const { ticket } = await FindOrCreateTicketService(contact, whatsapp.id, companyId);
+        
+        let message = "";
+        if (status === "EM_ANDAMENTO") {
+          message = `*Pedido #${order.id}*\nSeu pedido foi aceito e já está em produção! 🚀`;
+        } else if (status === "REVISAO") {
+          message = `*Pedido #${order.id}*\nSeu vídeo está pronto para revisão! Assista no nosso portal: ${process.env.FRONTEND_URL}/portal/orders`;
+        } else if (status === "AGUARDANDO_PAGAMENTO") {
+          const product = await Product.findByPk(order.productId || productId || order.productId);
+          message = `*Pedido #${order.id}*\nSeu pedido foi aprovado! 🏆\n\n`;
+          
+          if (product?.pixCopiaCola) {
+            message += `*Chave PIX (Copia e Cola):*\n${product.pixCopiaCola}\n\n`;
+          }
+          
+          message += `Você também pode ver o QR Code no portal: ${process.env.FRONTEND_URL}/portal/orders`;
+        } else if (status === "PAGO") {
+          message = `*Pedido #${order.id}*\nSeu pagamento foi confirmado! 🚀\nObrigado por confiar no nosso trabalho. ✨`;
+        } else if (status === "CONCLUIDO") {
+          message = `*Pedido #${order.id}*\nPedido concluído com sucesso! Obrigado pela preferência. ✨`;
+        }
+
+        if (message) {
+          // Attempt to send via WhatsApp, but don't crash if session is flapping
+          try {
+            const product = await Product.findByPk(order.productId || productId || order.productId);
+            
+            // If it's PIX status and there is a QR Code image, send it first
+            if (status === "AGUARDANDO_PAGAMENTO" && product?.pixImageUrl) {
+                const publicFolder = path.resolve(__dirname, "..", "..", "..", "public");
+                const filePath = path.join(publicFolder, product.pixImageUrl);
+                
+                if (fs.existsSync(filePath)) {
+                    await SendWhatsAppMedia({
+                        media: {
+                            path: filePath,
+                            originalname: product.pixImageUrl,
+                            mimetype: "image/png",
+                            size: fs.statSync(filePath).size
+                        } as any,
+                        ticket,
+                        caption: message
+                    });
+                } else {
+                    await SendWhatsAppMessage({ body: message, ticket });
+                }
+            } else {
+                await SendWhatsAppMessage({ body: message, ticket });
+            }
+          } catch (wErr: any) {
+            console.warn(`[ServiceOrder] WhatsApp send failed for order #${order.id}, recording in chat anyway:`, wErr.message);
+          }
+          
+          // Always record in database so the operator sees what was attempted
+          await CreateMessageService({
+            messageData: {
+              id: `notif_order_${order.id}_${new Date().getTime()}`,
+              ticketId: ticket.id,
+              contactId: contact.id,
+              body: message,
+              fromMe: true,
+              read: true
+            },
+            companyId
+          });
+        }
+      }
+    } catch (err) {
+      console.error("[ServiceOrder] Critical error in notification background process:", err);
+    }
+  })();
 
   if (status === "CONCLUIDO" && oldStatus !== "CONCLUIDO") {
     await ContactPurchase.create({

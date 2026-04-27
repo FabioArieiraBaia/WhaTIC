@@ -35,6 +35,10 @@ import ToDoList from "../pages/ToDoList/";
 import Subscription from "../pages/Subscription/";
 import Products from "../pages/Products/";
 import FinanceiroGestao from "../pages/FinanceiroGestao/";
+import PortalLogin from "../pages/Portal/Login";
+import PortalOrders from "../pages/Portal/Orders";
+import PortalLanding from "../pages/Portal/Landing";
+import ServiceOrders from "../pages/ServiceOrders/";
 
 const Routes = () => {
   const [showCampaigns, setShowCampaigns] = useState(false);
@@ -53,6 +57,9 @@ const Routes = () => {
           <Switch>
             <Route exact path="/login" component={Login} />
             <Route exact path="/signup" component={Signup} />
+            <Route exact path="/portal" component={PortalLanding} />
+            <Route exact path="/portal/login" component={PortalLogin} />
+            <Route exact path="/portal/orders" component={PortalOrders} />
             {/* <Route exact path="/create-company" component={Companies} /> */}
             <WhatsAppsProvider>
               <LoggedInLayout>
@@ -123,6 +130,7 @@ const Routes = () => {
                   isPrivate
                 />
                 <Route exact path="/products" component={Products} isPrivate />
+                <Route exact path="/service-orders" component={ServiceOrders} isPrivate />
                 <Route exact path="/financeiro-gestao" component={FinanceiroGestao} isPrivate />
                 
                 <Route exact path="/chats/:id?" component={Chat} isPrivate />

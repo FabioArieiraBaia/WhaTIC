@@ -30,6 +30,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     if (files.testimonialImage) {
       productData.testimonialImageUrl = files.testimonialImage[0].filename;
     }
+    if (files.pixImage) {
+      productData.pixImageUrl = files.pixImage[0].filename;
+    }
   }
 
   if (productData.promotionalPrice === "null" || productData.promotionalPrice === "") {
@@ -85,6 +88,9 @@ export const update = async (
     if (files.testimonialImage) {
       productData.testimonialImageUrl = files.testimonialImage[0].filename;
     }
+    if (files.pixImage) {
+      productData.pixImageUrl = files.pixImage[0].filename;
+    }
   }
 
   if (productData.promotionalPrice === "null" || productData.promotionalPrice === "") {
@@ -97,6 +103,11 @@ export const update = async (
 
   if (!product) {
     throw new AppError("ERR_NO_PRODUCT_FOUND", 404);
+  }
+
+  // Explicitly check and set PIX image URL if a file was uploaded
+  if (files && files.pixImage) {
+    productData.pixImageUrl = files.pixImage[0].filename;
   }
 
   await product.update(productData);

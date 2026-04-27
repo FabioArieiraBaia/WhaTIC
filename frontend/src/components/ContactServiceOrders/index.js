@@ -1,221 +1,118 @@
-import React, { useEffect, useState } from "react";
-import {
-  Typography,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-  IconButton,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Chip
-} from "@material-ui/core";
-import DeleteIcon from "@material-ui/icons/Delete";
-import AddIcon from "@material-ui/icons/Add";
+import React, { useState, useEffect } from "react";
+import { makeStyles } from "@material-ui/core/styles";
+import Button from "@material-ui/core/Button";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import IconButton from "@material-ui/core/IconButton";
 import EditIcon from "@material-ui/icons/Edit";
+import Chip from "@material-ui/core/Chip";
+import Typography from "@material-ui/core/Typography";
+
 import api from "../../services/api";
-import { toast } from "react-toastify";
+import toastError from "../../errors/toastError";
+import ServiceOrderModal from "../ServiceOrderModal";
 
-const ContactServiceOrders = ({ contactId }) => {
+const useStyles = makeStyles((theme) => ({
+  root: {
+    width: "100%",
+    maxWidth: 360,
+    backgroundColor: theme.palette.background.paper,
+  },
+  inline: {
+    display: "inline",
+  },
+}));
+
+const ContactServiceOrders = ({ open, onClose, contactId }) => {
+  const classes = useStyles();
   const [orders, setOrders] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [editingOrder, setEditingOrder] = useState(null);
-  const initialOrderState = {
-    productId: "",
-    description: "",
-    status: "PENDENTE",
-    value: 0
-  };
-
-  const [orderData, setOrderData] = useState(initialOrderState);
-
-  const statuses = [
-    { value: "PENDENTE", label: "Pendente", color: "#f44336" },
-    { value: "EM_ANDAMENTO", label: "Em Andamento", color: "#2196f3" },
-    { value: "REVISAO", label: "Em Revisão", color: "#ff9800" },
-    { value: "CONCLUIDO", label: "Concluído", color: "#4caf50" }
-  ];
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const [orderModalOpen, setOrderModalOpen] = useState(false);
 
   useEffect(() => {
-    fetchOrders();
-    fetchProducts();
+    if (contactId) {
+      fetchOrders();
+    }
   }, [contactId]);
 
   const fetchOrders = async () => {
-    try {
-      const { data } = await api.get(`/contacts/${contactId}/service-orders`);
-      setOrders(data);
-    } catch (err) {
-      toast.error("Erro ao buscar ordens de serviço");
-    }
-  };
-
-  const fetchProducts = async () => {
-    try {
-      const { data } = await api.get("/products");
-      setProducts(data || []);
-    } catch (err) {
-      toast.error("Erro ao buscar produtos");
-    }
-  };
-
-  const handleSaveOrder = async () => {
     setLoading(true);
     try {
-      if (editingOrder) {
-        await api.put(`/contacts/service-orders/${editingOrder.id}`, {
-          ...orderData
-        });
-        toast.success("OS atualizada com sucesso");
-      } else {
-        await api.post("/contacts/service-orders", {
-          ...orderData,
-          contactId
-        });
-        toast.success("OS aberta com sucesso");
-      }
-      setOpen(false);
-      setEditingOrder(null);
-      setOrderData(initialOrderState);
-      fetchOrders();
+      const { data } = await api.get(`/service-orders/${contactId}`);
+      setOrders(data);
     } catch (err) {
-      toast.error("Erro ao salvar OS");
-    } finally {
-      setLoading(false);
+      toastError(err);
     }
+    setLoading(false);
   };
 
-  const handleDeleteOrder = async (id) => {
-    try {
-      await api.delete(`/contacts/service-orders/${id}`);
-      toast.success("OS removida");
-      fetchOrders();
-    } catch (err) {
-      toast.error("Erro ao remover OS");
-    }
+  const handleEditOrder = (orderId) => {
+    setSelectedOrderId(orderId);
+    setOrderModalOpen(true);
   };
 
-  const handleEditOrder = (order) => {
-    setEditingOrder(order);
-    setOrderData({
-      productId: order.productId || "",
-      description: order.description,
-      status: order.status,
-      value: order.value || 0
-    });
-    setOpen(true);
-  };
+  const renderList = () => (
+    <List>
+      {orders.length === 0 && !loading && (
+        <Typography variant="body2" style={{ padding: 10 }}>Nenhum pedido encontrado.</Typography>
+      )}
+      {orders.map((order) => (
+        <ListItem key={order.id} alignItems="flex-start" divider>
+          <ListItemText
+            primary={`Pedido #${order.id}`}
+            secondary={
+              <React.Fragment>
+                <Typography component="span" variant="body2" color="textPrimary">
+                  {order.product?.name || "Produto N/A"} - R$ {order.value}
+                </Typography>
+                <br />
+                <Chip 
+                  label={order.status} 
+                  size="small" 
+                  variant="outlined" 
+                  color={order.status === "EM_ANDAMENTO" ? "primary" : "default"}
+                />
+              </React.Fragment>
+            }
+          />
+          <ListItemSecondaryAction>
+            <IconButton edge="end" aria-label="edit" onClick={() => handleEditOrder(order.id)}>
+              <EditIcon />
+            </IconButton>
+          </ListItemSecondaryAction>
+        </ListItem>
+      ))}
+    </List>
+  );
 
   return (
     <>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-        <Typography variant="subtitle2">Ordens de Serviço</Typography>
-        <IconButton size="small" color="primary" onClick={() => setOpen(true)}>
-          <AddIcon />
-        </IconButton>
-      </div>
-
-      <List dense>
-        {orders.map((order) => (
-          <ListItem key={order.id} divider alignItems="flex-start">
-            <ListItemText
-              primary={order.description}
-              secondary={
-                <>
-                  <Typography variant="caption" display="block">
-                    {order.product?.name || "Sem Produto"} {order.value > 0 && `• R$ ${order.value}`}
-                  </Typography>
-                  <Chip
-                    size="small"
-                    label={statuses.find(s => s.value === order.status)?.label}
-                    style={{
-                      backgroundColor: statuses.find(s => s.value === order.status)?.color,
-                      color: "white",
-                      fontSize: 10,
-                      height: 20,
-                      marginTop: 4
-                    }}
-                  />
-                </>
-              }
-            />
-            <ListItemSecondaryAction>
-              <IconButton edge="end" size="small" onClick={() => handleEditOrder(order)}>
-                <EditIcon />
-              </IconButton>
-              <IconButton edge="end" size="small" onClick={() => handleDeleteOrder(order.id)}>
-                <DeleteIcon />
-              </IconButton>
-            </ListItemSecondaryAction>
-          </ListItem>
-        ))}
-      </List>
-
-      <Dialog open={open} onClose={() => { setOpen(false); setEditingOrder(null); }} maxWidth="xs" fullWidth>
-        <DialogTitle>{editingOrder ? "Editar OS" : "Abrir Nova OS"}</DialogTitle>
-        <DialogContent dividers>
-          <FormControl fullWidth margin="dense" variant="outlined">
-            <InputLabel>Produto Relacionado</InputLabel>
-            <Select
-              value={orderData.productId}
-              onChange={(e) => setOrderData({ ...orderData, productId: e.target.value })}
-              label="Produto Relacionado"
-            >
-              <MenuItem value="">Nenhum</MenuItem>
-              {products.map(prod => (
-                <MenuItem key={prod.id} value={prod.id}>{prod.name}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <TextField
-            fullWidth
-            margin="dense"
-            label="Valor do Serviço (R$)"
-            variant="outlined"
-            type="number"
-            value={orderData.value}
-            onChange={(e) => setOrderData({ ...orderData, value: e.target.value })}
-          />
-          <TextField
-            fullWidth
-            margin="dense"
-            label="Descrição do Serviço"
-            variant="outlined"
-            multiline
-            rows={3}
-            value={orderData.description}
-            onChange={(e) => setOrderData({ ...orderData, description: e.target.value })}
-          />
-          <FormControl fullWidth margin="dense" variant="outlined">
-            <InputLabel>Status</InputLabel>
-            <Select
-              value={orderData.status}
-              onChange={(e) => setOrderData({ ...orderData, status: e.target.value })}
-              label="Status"
-            >
-              {statuses.map(s => (
-                <MenuItem key={s.value} value={s.value}>{s.label}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => { setOpen(false); setEditingOrder(null); }}>Cancelar</Button>
-          <Button color="primary" variant="contained" onClick={handleSaveOrder} disabled={loading || !orderData.description}>
-            {loading ? "Salvando..." : "Salvar"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <ServiceOrderModal
+        open={orderModalOpen}
+        onClose={() => {
+          setOrderModalOpen(false);
+          fetchOrders();
+        }}
+        orderId={selectedOrderId}
+      />
+      {open !== undefined ? (
+        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+          <DialogTitle>Pedidos do Cliente</DialogTitle>
+          <DialogContent dividers>
+            {renderList()}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={onClose} color="primary">Fechar</Button>
+          </DialogActions>
+        </Dialog>
+      ) : renderList()}
     </>
   );
 };

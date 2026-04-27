@@ -15,7 +15,8 @@ productRoutes.post(
   upload.fields([
     { name: "image", maxCount: 1 },
     { name: "testimonialAudio", maxCount: 1 },
-    { name: "testimonialImage", maxCount: 1 }
+    { name: "testimonialImage", maxCount: 1 },
+    { name: "pixImage", maxCount: 1 }
   ]),
   ProductController.store
 );
@@ -26,7 +27,8 @@ productRoutes.put(
   upload.fields([
     { name: "image", maxCount: 1 },
     { name: "testimonialAudio", maxCount: 1 },
-    { name: "testimonialImage", maxCount: 1 }
+    { name: "testimonialImage", maxCount: 1 },
+    { name: "pixImage", maxCount: 1 }
   ]),
   ProductController.update
 );

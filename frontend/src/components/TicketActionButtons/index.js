@@ -3,12 +3,13 @@ import { useHistory } from "react-router-dom";
 
 import { makeStyles } from "@material-ui/core/styles";
 import { IconButton, Tooltip } from "@material-ui/core";
-import { MoreVert, Replay, Android } from "@material-ui/icons";
+import { MoreVert, Replay, Android, ShoppingCart } from "@material-ui/icons";
 
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import TicketOptionsMenu from "../TicketOptionsMenu";
 import ButtonWithSpinner from "../ButtonWithSpinner";
+import ContactServiceOrders from "../ContactServiceOrders";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
 
@@ -30,6 +31,7 @@ const TicketActionButtons = ({ ticket }) => {
 	const history = useHistory();
 	const [anchorEl, setAnchorEl] = useState(null);
 	const [loading, setLoading] = useState(false);
+	const [contactOrdersOpen, setContactOrdersOpen] = useState(false);
 	const ticketOptionsMenuOpen = Boolean(anchorEl);
 	const { user } = useContext(AuthContext);
 
@@ -107,9 +109,19 @@ const TicketActionButtons = ({ ticket }) => {
 							<Android color={ticket.aiAgent ? "primary" : "action"} />
 						</IconButton>
 					</Tooltip>
+					<Tooltip title="Gerenciar Pedidos do Cliente">
+						<IconButton onClick={() => setContactOrdersOpen(true)}>
+							<ShoppingCart color="primary" />
+						</IconButton>
+					</Tooltip>
 					<IconButton onClick={handleOpenTicketOptionsMenu}>
 						<MoreVert />
 					</IconButton>
+					<ContactServiceOrders
+						open={contactOrdersOpen}
+						onClose={() => setContactOrdersOpen(false)}
+						contactId={ticket.contact.id}
+					/>
 					<TicketOptionsMenu
 						ticket={ticket}
 						anchorEl={anchorEl}

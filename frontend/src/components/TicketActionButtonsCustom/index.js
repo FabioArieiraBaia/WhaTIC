@@ -3,12 +3,13 @@ import { useHistory } from "react-router-dom";
 
 import { makeStyles, createTheme, ThemeProvider } from "@material-ui/core/styles";
 import { IconButton } from "@material-ui/core";
-import { MoreVert, Replay, Android } from "@material-ui/icons";
+import { MoreVert, Replay, Android, ShoppingCart } from "@material-ui/icons";
 
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import TicketOptionsMenu from "../TicketOptionsMenu";
 import ButtonWithSpinner from "../ButtonWithSpinner";
+import ContactServiceOrders from "../ContactServiceOrders";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { TicketsContext } from "../../context/Tickets/TicketsContext";
@@ -39,6 +40,7 @@ const TicketActionButtonsCustom = ({ ticket, showTabGroups }) => {
 	const history = useHistory();
 	const [anchorEl, setAnchorEl] = useState(null);
 	const [loading, setLoading] = useState(false);
+	const [contactOrdersOpen, setContactOrdersOpen] = useState(false);
 	const ticketOptionsMenuOpen = Boolean(anchorEl);
 	const { user } = useContext(AuthContext);
 	const { setCurrentTicket } = useContext(TicketsContext);
@@ -110,6 +112,16 @@ const TicketActionButtonsCustom = ({ ticket, showTabGroups }) => {
      
 	return (
     <div className={classes.actionButtons}>
+      <Tooltip title="Gerenciar Pedidos do Cliente">
+        <IconButton onClick={() => setContactOrdersOpen(true)}>
+          <ShoppingCart color="primary" />
+        </IconButton>
+      </Tooltip>
+      <ContactServiceOrders
+        open={contactOrdersOpen}
+        onClose={() => setContactOrdersOpen(false)}
+        contactId={ticket.contact.id}
+      />
       {ticket.status === "closed" && (!showTabGroups || !ticket.isGroup) && (
         <>
           <Tooltip title={i18n.t("ticketsManager.buttons.newTicket")}>
@@ -184,9 +196,9 @@ const TicketActionButtonsCustom = ({ ticket, showTabGroups }) => {
             </>
           }
 
-          <IconButton onClick={handleOpenTicketOptionsMenu}>
-						<MoreVert />
-					</IconButton>
+              <IconButton onClick={handleOpenTicketOptionsMenu}>
+                <MoreVert />
+              </IconButton>
 					<TicketOptionsMenu
 						ticket={ticket}
 						anchorEl={anchorEl}

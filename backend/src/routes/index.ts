@@ -35,6 +35,8 @@ import wavoipRoutes from "./wavoipRoutes";
 import productRoutes from "./productRoutes";
 import sleadsRoutes from "./sleadsRoutes";
 import financeiroRoutes from "./financeiroRoutes";
+import portalRoutes from "./portalRoutes";
+import serviceOrderRoutes from "./serviceOrderRoutes";
 
 const routes = Router();
 
@@ -73,5 +75,7 @@ routes.use(wavoipRoutes);
 routes.use(productRoutes);
 routes.use(sleadsRoutes);
 routes.use(financeiroRoutes);
+routes.use(portalRoutes);
+routes.use(serviceOrderRoutes);
 
 export default routes;

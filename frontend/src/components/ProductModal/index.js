@@ -66,11 +66,14 @@ const ProductModal = ({ open, onClose, productId }) => {
     videoUrl: "",
     testimonials: "",
     relatedProducts: "",
+    pixCopiaCola: "",
+    pixImageUrl: "",
     isActive: true,
   };
 
   const [product, setProduct] = useState(initialState);
   const [attachment, setAttachment] = useState(null);
+  const [pixAttachment, setPixAttachment] = useState(null);
   const [testimonialAudio, setTestimonialAudio] = useState(null);
   const [testimonialImage, setTestimonialImage] = useState(null);
 
@@ -91,6 +94,8 @@ const ProductModal = ({ open, onClose, productId }) => {
   const handleClose = () => {
     onClose();
     setProduct(initialState);
+    setPixAttachment(null);
+    setAttachment(null);
   };
 
   const handleSaveProduct = async (values) => {
@@ -104,8 +109,13 @@ const ProductModal = ({ open, onClose, productId }) => {
       formData.append("videoUrl", values.videoUrl || "");
       formData.append("testimonials", values.testimonials || "");
       formData.append("relatedProducts", values.relatedProducts || "");
+      formData.append("pixCopiaCola", values.pixCopiaCola || "");
+
       if (attachment) {
         formData.append("image", attachment);
+      }
+      if (pixAttachment) {
+        formData.append("pixImage", pixAttachment);
       }
       if (testimonialAudio) {
         formData.append("testimonialAudio", testimonialAudio);
@@ -258,7 +268,36 @@ const ProductModal = ({ open, onClose, productId }) => {
                     rows={2}
                   />
                 </div>
+                <div className={classes.multFieldLine}>
+                  <Field
+                    as={TextField}
+                    label={i18n.t("PIX Copia e Cola (Estático)")}
+                    name="pixCopiaCola"
+                    error={touched.pixCopiaCola && Boolean(errors.pixCopiaCola)}
+                    helperText={touched.pixCopiaCola && errors.pixCopiaCola}
+                    variant="outlined"
+                    margin="dense"
+                    fullWidth
+                    multiline
+                    rows={2}
+                  />
+                </div>
                 <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                  <div>
+                    <input
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      id="pix-image-file"
+                      type="file"
+                      onChange={(e) => setPixAttachment(e.target.files[0])}
+                    />
+                    <label htmlFor="pix-image-file">
+                      <Button variant="contained" component="span" size="small" color="secondary">
+                        {pixAttachment ? "QR Code OK" : "QR Code PIX"}
+                      </Button>
+                    </label>
+                  </div>
+
                   <div>
                     <input
                       accept="image/*"
