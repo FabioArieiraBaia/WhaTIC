@@ -194,10 +194,11 @@ const FinanceiroGestao = () => {
   };
 
   const formatCurrency = (value) => {
+    const number = typeof value === "number" ? value : parseFloat(value) || 0;
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
-    }).format(value);
+    }).format(number);
   };
 
   if (loading) {
@@ -208,7 +209,7 @@ const FinanceiroGestao = () => {
     );
   }
 
-  const currentBalance = data.totalIncomesMonth - data.totalExpensesMonth;
+  const currentBalance = (data?.totalIncomesMonth || 0) - (data?.totalExpensesMonth || 0);
 
   return (
     <Container maxWidth="lg" className={classes.container}>
@@ -232,14 +233,14 @@ const FinanceiroGestao = () => {
         <Grid item xs={12} sm={4}>
           <Paper className={`${classes.card} ${classes.cardIncome}`}>
             <Typography variant="subtitle1" style={{ opacity: 0.9 }}>Entradas (Mês)</Typography>
-            <Typography className={classes.value}>{formatCurrency(data.totalIncomesMonth)}</Typography>
+            <Typography className={classes.value}>{formatCurrency(data?.totalIncomesMonth)}</Typography>
             <TrendingUpIcon className={classes.cardIcon} />
           </Paper>
         </Grid>
         <Grid item xs={12} sm={4}>
           <Paper className={`${classes.card} ${classes.cardExpense}`}>
             <Typography variant="subtitle1" style={{ opacity: 0.9 }}>Saídas (Mês)</Typography>
-            <Typography className={classes.value}>{formatCurrency(data.totalExpensesMonth)}</Typography>
+            <Typography className={classes.value}>{formatCurrency(data?.totalExpensesMonth)}</Typography>
             <TrendingDownIcon className={classes.cardIcon} />
           </Paper>
         </Grid>
@@ -312,7 +313,7 @@ const FinanceiroGestao = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {data.topClients.map((row, index) => (
+                 {(data?.topClients || []).map((row, index) => (
                   <TableRow key={index}>
                     <TableCell>
                       {index < 3 ? (index === 0 ? "🥇 " : index === 1 ? "🥈 " : "🥉 ") : ""}
@@ -342,12 +343,12 @@ const FinanceiroGestao = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {data.recentExpenses.map((row) => (
+                 {(data?.recentExpenses || []).map((row) => (
                   <TableRow key={row.id}>
                     <TableCell>
                       {row.description}
                       <Typography variant="caption" display="block" color="textSecondary">
-                        {moment(row.expenseDate).format("DD/MM/YYYY")} - {row.category}
+                        {row.expenseDate ? moment(row.expenseDate).format("DD/MM/YYYY") : "Sem data"} - {row.category}
                       </Typography>
                     </TableCell>
                     <TableCell align="right" style={{ color: "#d32f2f", fontWeight: 600 }}>
