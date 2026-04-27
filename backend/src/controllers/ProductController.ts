@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { getIO } from "../libs/socket";
 import AppError from "../errors/AppError";
 import Product from "../models/Product";
+import { uploadToGCS } from "../helpers/UploadToGCS";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
@@ -22,16 +23,16 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   if (files) {
     if (files.image) {
-      productData.imageUrl = files.image[0].filename;
+      productData.imageUrl = await uploadToGCS(files.image[0]);
     }
     if (files.testimonialAudio) {
-      productData.testimonialAudioUrl = files.testimonialAudio[0].filename;
+      productData.testimonialAudioUrl = await uploadToGCS(files.testimonialAudio[0]);
     }
     if (files.testimonialImage) {
-      productData.testimonialImageUrl = files.testimonialImage[0].filename;
+      productData.testimonialImageUrl = await uploadToGCS(files.testimonialImage[0]);
     }
     if (files.pixImage) {
-      productData.pixImageUrl = files.pixImage[0].filename;
+      productData.pixImageUrl = await uploadToGCS(files.pixImage[0]);
     }
   }
 
@@ -80,16 +81,16 @@ export const update = async (
 
   if (files) {
     if (files.image) {
-      productData.imageUrl = files.image[0].filename;
+      productData.imageUrl = await uploadToGCS(files.image[0]);
     }
     if (files.testimonialAudio) {
-      productData.testimonialAudioUrl = files.testimonialAudio[0].filename;
+      productData.testimonialAudioUrl = await uploadToGCS(files.testimonialAudio[0]);
     }
     if (files.testimonialImage) {
-      productData.testimonialImageUrl = files.testimonialImage[0].filename;
+      productData.testimonialImageUrl = await uploadToGCS(files.testimonialImage[0]);
     }
     if (files.pixImage) {
-      productData.pixImageUrl = files.pixImage[0].filename;
+      productData.pixImageUrl = await uploadToGCS(files.pixImage[0]);
     }
   }
 
@@ -103,11 +104,6 @@ export const update = async (
 
   if (!product) {
     throw new AppError("ERR_NO_PRODUCT_FOUND", 404);
-  }
-
-  // Explicitly check and set PIX image URL if a file was uploaded
-  if (files && files.pixImage) {
-    productData.pixImageUrl = files.pixImage[0].filename;
   }
 
   await product.update(productData);
