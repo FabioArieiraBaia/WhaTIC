@@ -4,6 +4,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+RUN npm run generate:i18nkeys
 RUN npm run build
 EXPOSE 8080
 ENV PORT=8080
