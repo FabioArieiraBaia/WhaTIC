@@ -69,11 +69,3 @@ Responda como o assistente virtual seguindo o system prompt:
   const response = await result.response;
   return response.text();
 };
-
-Responda como o assistente virtual seguindo o system prompt:
-`;
-
-  const result = await model.generateContent([systemPrompt, prompt]);
-  const response = await result.response;
-  return response.text();
-};
