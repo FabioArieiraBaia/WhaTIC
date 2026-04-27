@@ -48,3 +48,6 @@ steps:
 images:
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/whatic/backend:latest'
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/whatic/frontend:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
