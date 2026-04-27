@@ -16,8 +16,20 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
     throw new AppError("Número de telefone é obrigatório", 400);
   }
 
+  // Clean the input number
+  const cleanNumber = number.replace(/\D/g, "");
+
+  // Try to find the contact with exact match or matching the end of the number
   const contact = await Contact.findOne({
-    where: { number }
+    where: { 
+      number: cleanNumber
+    }
+  }) || await Contact.findOne({
+    where: {
+      number: {
+        [require("sequelize").Op.like]: `%${cleanNumber}`
+      }
+    }
   });
 
   if (!contact) {
