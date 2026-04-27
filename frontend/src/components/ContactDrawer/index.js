@@ -25,6 +25,8 @@ import useSettings from "../../hooks/useSettings";
 import ContactPurchases from "../ContactPurchases";
 import ContactServiceOrders from "../ContactServiceOrders";
 import { Divider, Tab, Tabs } from "@material-ui/core";
+import ServiceOrderModal from "../ServiceOrderModal";
+import AddIcon from "@material-ui/icons/Add";
 
 const drawerWidth = 320;
 
@@ -109,6 +111,8 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, ticket, loading }) =>
   const [showTags, setShowTags] = useState(false);
   const [tab, setTab] = useState(0);
   const [totalSpent, setTotalSpent] = useState(0);
+  const [serviceOrderModalOpen, setServiceOrderModalOpen] = useState(false);
+  const [osRefreshKey, setOsRefreshKey] = useState(0);
 
 	useEffect(() => {
     getSetting("tagsMode").then(res => {
@@ -212,7 +216,21 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, ticket, loading }) =>
                 <div style={{ padding: 8 }}>
                   {tab === 0 && <TicketNotes ticket={ticket} />}
                   {tab === 1 && <ContactPurchases contactId={contact.id} onTotalUpdate={setTotalSpent} />}
-                  {tab === 2 && <ContactServiceOrders contactId={contact.id} />}
+                  {tab === 2 && (
+                    <>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        fullWidth
+                        startIcon={<AddIcon />}
+                        onClick={() => setServiceOrderModalOpen(true)}
+                        style={{ marginBottom: 8 }}
+                      >
+                        Nova O.S.
+                      </Button>
+                      <ContactServiceOrders key={osRefreshKey} contactId={contact.id} />
+                    </>
+                  )}
                 </div>
               </Paper>
               <div style={{ marginTop: 8, padding: 8, display: 'flex', justifyContent: 'space-between' }}>
@@ -226,6 +244,14 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, ticket, loading }) =>
 							onClose={() => setModalOpen(false)}
 							contactId={contact.id}
 						></ContactModal>
+            <ServiceOrderModal
+              open={serviceOrderModalOpen}
+              onClose={() => {
+                setServiceOrderModalOpen(false);
+                setOsRefreshKey(old => old + 1);
+              }}
+              contactId={contact.id}
+            />
 					</div>
 				)}
 			</Drawer>

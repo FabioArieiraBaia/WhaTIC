@@ -1,5 +1,6 @@
 import { Ticket } from "../../models/Ticket";
 import Product from "../../models/Product";
+import ServiceOrder from "../../models/ServiceOrder";
 import SendWhatsAppMessage from "../WbotServices/SendWhatsAppMessage";
 import SendWhatsAppMedia from "../WbotServices/SendWhatsAppMedia";
 import path from "path";
@@ -80,6 +81,29 @@ const handleAIAgent = async (
         }
       }
       response = response.replace(/\[SEND_PRINT_(\d+)\]/g, "");
+    }
+
+    // Check for Service Order creation
+    const orderMatch = response.match(/\[CREATE_ORDER_(.+?)_([\d.]+)\]/);
+    if (orderMatch) {
+      const description = orderMatch[1];
+      const valueStr = orderMatch[2];
+      const value = parseFloat(valueStr);
+      
+      try {
+        const order = await ServiceOrder.create({
+          contactId: ticket.contactId,
+          companyId: ticket.companyId,
+          description,
+          value: isNaN(value) ? 0 : value,
+          status: "PENDENTE"
+        });
+        
+        response = response.replace(/\[CREATE_ORDER_(.+?)_([\d.]+)\]/g, "");
+        response += `\n\n✅ *Ordem de Serviço #${order.id} aberta com sucesso!*\nVocê já pode acompanhar os detalhes e realizar o pagamento pelo seu portal do cliente.`;
+      } catch (err) {
+        console.error("Error creating AI Service Order:", err);
+      }
     }
 
     if (response.trim() !== "") {

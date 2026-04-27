@@ -20,6 +20,7 @@ import Select from "@material-ui/core/Select";
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
+import { ContactSelect } from "../ContactSelect";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -54,7 +55,7 @@ const ServiceOrderSchema = Yup.object().shape({
   finalVideoUrl: Yup.string().url("URL inválida").nullable(),
 });
 
-const ServiceOrderModal = ({ open, onClose, orderId }) => {
+const ServiceOrderModal = ({ open, onClose, orderId, contactId }) => {
   const classes = useStyles();
 
   const initialState = {
@@ -62,7 +63,8 @@ const ServiceOrderModal = ({ open, onClose, orderId }) => {
     description: "",
     videoUrl: "",
     finalVideoUrl: "",
-    value: ""
+    value: "",
+    contactId: ""
   };
 
   const [order, setOrder] = useState(initialState);
@@ -98,8 +100,16 @@ const ServiceOrderModal = ({ open, onClose, orderId }) => {
 
   const handleSaveOrder = async (values) => {
     try {
-      await api.put(`/service-orders/${orderId}`, values);
-      toast.success(i18n.t("Pedido atualizado com sucesso!"));
+      if (orderId) {
+        await api.put(`/service-orders/${orderId}`, values);
+        toast.success(i18n.t("Pedido atualizado com sucesso!"));
+      } else {
+        const data = { ...values };
+        if (contactId) data.contactId = contactId;
+        
+        await api.post(`/service-orders`, data);
+        toast.success(i18n.t("Pedido criado com sucesso!"));
+      }
     } catch (err) {
       toastError(err);
     }
@@ -116,7 +126,7 @@ const ServiceOrderModal = ({ open, onClose, orderId }) => {
         scroll="paper"
       >
         <DialogTitle id="form-dialog-title">
-          {i18n.t("Gerenciar Pedido")} #{orderId}
+          {orderId ? `${i18n.t("Gerenciar Pedido")} #${orderId}` : i18n.t("Novo Pedido")}
         </DialogTitle>
         <Formik
           initialValues={order}
@@ -132,6 +142,15 @@ const ServiceOrderModal = ({ open, onClose, orderId }) => {
           {({ touched, errors, isSubmitting, values, setFieldValue }) => (
             <Form>
               <DialogContent dividers>
+                {!contactId && !orderId && (
+                  <FormControl variant="outlined" className={classes.formControl} margin="dense">
+                    <ContactSelect
+                      label={i18n.t("Selecionar Cliente")}
+                      onSelected={(id) => setFieldValue("contactId", id)}
+                    />
+                  </FormControl>
+                )}
+
                 <FormControl variant="outlined" className={classes.formControl} margin="dense">
                   <InputLabel>{i18n.t("Status")}</InputLabel>
                   <Select
