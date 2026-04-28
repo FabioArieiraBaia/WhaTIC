@@ -24,4 +24,4 @@ ENV REDIS_URI=redis://127.0.0.1:6379
 ENV REDIS_OPT_PORT=6379
 
 # Inicia o Redis sem disco e depois a aplicação
-CMD redis-server --protected-mode no --save "" --appendonly no & sleep 4 && npx sequelize-cli db:migrate && node dist/server.js
+CMD redis-server --protected-mode no --save "" --appendonly no & sleep 4 && npx -y sequelize-cli db:migrate && node dist/server.js
