@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../services/api";
@@ -31,7 +31,7 @@ const usePortalAuth = () => {
     })();
   }, []);
 
-  const handleLogin = async (userData) => {
+  const handleLogin = useCallback(async (userData) => {
     setLoading(true);
 
     try {
@@ -50,17 +50,13 @@ const usePortalAuth = () => {
       setIsAuth(true);
       setLoading(false);
       
-      if (!data.resetPassword) {
-        history.push("/portal/orders");
-      }
-      
       return { success: true, resetPassword: data.resetPassword, contactId: data.contactId };
     } catch (err) {
       toastError(err);
       setLoading(false);
       return { success: false };
     }
-  };
+  }, []);
 
   const handleLogout = useCallback(() => {
     localStorage.removeItem("portalToken");
