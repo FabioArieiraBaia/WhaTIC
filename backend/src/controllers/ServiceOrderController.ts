@@ -9,9 +9,8 @@ import AppError from "../errors/AppError";
 import FindOrCreateTicketService from "../services/TicketServices/FindOrCreateTicketService";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import CreateMessageService from "../services/MessageServices/CreateMessageService";
-import SendWhatsAppMedia from "../services/WbotServices/SendWhatsAppMedia";
-import path from "path";
-import fs from "fs";
+import { getMessageFileOptions, sendWhatsappFile } from "../services/WbotServices/SendWhatsAppMedia";
+import { getFullUrl } from "../helpers/FormatProductUrls";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { contactId } = req.params;
@@ -136,22 +135,30 @@ export const update = async (req: Request, res: Response): Promise<Response> => 
           try {
             const product = await Product.findByPk(order.productId || productId || order.productId);
             
-            // If it's PIX status and there is a QR Code image, send it first
+            // If it's PIX status and there is a QR Code image, send it via URL (supports both GCS and local)
             if (status === "AGUARDANDO_PAGAMENTO" && product?.pixImageUrl) {
-                const publicFolder = path.resolve(__dirname, "..", "..", "..", "public");
-                const filePath = path.join(publicFolder, product.pixImageUrl);
+                const pixUrl = getFullUrl(product.pixImageUrl);
                 
-                if (fs.existsSync(filePath)) {
-                    await SendWhatsAppMedia({
-                        media: {
-                            path: filePath,
-                            originalname: product.pixImageUrl,
+                if (pixUrl) {
+                    const mediaOptions = await getMessageFileOptions(
+                        "qrcode-pix.png",
+                        pixUrl,
+                        "image/png"
+                    );
+                    
+                    if (mediaOptions) {
+                        await sendWhatsappFile(ticket, {
+                            mediaUrl: product.pixImageUrl,
                             mimetype: "image/png",
-                            size: fs.statSync(filePath).size
-                        } as any,
-                        ticket,
-                        caption: message
-                    });
+                            filename: "qrcode-pix.png"
+                        }, {
+                            caption: message,
+                            fileName: "qrcode-pix.png",
+                            ...mediaOptions
+                        } as any);
+                    } else {
+                        await SendWhatsAppMessage({ body: message, ticket });
+                    }
                 } else {
                     await SendWhatsAppMessage({ body: message, ticket });
                 }
