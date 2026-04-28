@@ -100,7 +100,7 @@ export const approveOrder = async (req: Request, res: Response): Promise<Respons
 
       if (whatsapp) {
         const { ticket } = await FindOrCreateTicketService(contact, whatsapp.id, companyId);
-        const message = `*Pedido #${order.id}*\nSeu pedido foi aprovado! 🏆\n\n${product.pixCopiaCola ? `*Chave PIX (Copia e Cola):*\n${product.pixCopiaCola}\n\n` : ""}Você também pode ver o QR Code no portal: ${process.env.FRONTEND_URL}/portal/orders`;
+        const message = `*Pedido #${order.id}*\n🎬 Seu vídeo está pronto!\n\nAcesse nossa plataforma e conclua o pagamento no link abaixo:\n${process.env.FRONTEND_URL}/portal/orders\n\n${product.pixCopiaCola ? `*Chave PIX (Copia e Cola):*\n${product.pixCopiaCola}\n\n` : ""}Assim que o pagamento for aprovado, você poderá fazer o download do seu vídeo. ✨`;
 
         await CreateMessageService({
           messageData: {

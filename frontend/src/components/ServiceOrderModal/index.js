@@ -64,7 +64,8 @@ const ServiceOrderModal = ({ open, onClose, orderId, contactId }) => {
     videoUrl: "",
     finalVideoUrl: "",
     value: "",
-    contactId: ""
+    contactId: "",
+    productId: ""
   };
 
   const [order, setOrder] = useState(initialState);
@@ -168,10 +169,11 @@ const ServiceOrderModal = ({ open, onClose, orderId, contactId }) => {
                   <InputLabel>{i18n.t("Selecionar Produto")}</InputLabel>
                   <Select
                     label={i18n.t("Selecionar Produto")}
-                    value=""
+                    value={values.productId || ""}
                     onChange={(e) => {
                       const selected = products.find(p => p.id === e.target.value);
                       if (selected) {
+                        setFieldValue("productId", selected.id);
                         setFieldValue("description", selected.name);
                         setFieldValue("value", selected.price);
                       }

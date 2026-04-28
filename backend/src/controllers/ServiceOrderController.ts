@@ -111,13 +111,13 @@ export const update = async (req: Request, res: Response): Promise<Response> => 
           message = `*Pedido #${order.id}*\nSeu vídeo está pronto para revisão! Assista no nosso portal: ${process.env.FRONTEND_URL}/portal/orders`;
         } else if (status === "AGUARDANDO_PAGAMENTO") {
           const product = await Product.findByPk(order.productId || productId || order.productId);
-          message = `*Pedido #${order.id}*\nSeu pedido foi aprovado! 🏆\n\n`;
+          message = `*Pedido #${order.id}*\n🎬 Seu vídeo está pronto!\n\nAcesse nossa plataforma e conclua o pagamento no link abaixo:\n${process.env.FRONTEND_URL}/portal/orders\n\n`;
           
           if (product?.pixCopiaCola) {
             message += `*Chave PIX (Copia e Cola):*\n${product.pixCopiaCola}\n\n`;
           }
           
-          message += `Você também pode ver o QR Code no portal: ${process.env.FRONTEND_URL}/portal/orders`;
+          message += `Assim que o pagamento for aprovado, você poderá fazer o download do seu vídeo. ✨`;
         } else if (status === "PAGO") {
           message = `*Pedido #${order.id}*\nSeu pagamento foi confirmado! 🚀\nObrigado por confiar no nosso trabalho. ✨`;
           if (finalVideoUrl) {
