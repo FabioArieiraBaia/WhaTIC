@@ -62,16 +62,9 @@ const usePortalAuth = () => {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     localStorage.removeItem("portalToken");
     localStorage.removeItem("portalContact");
-    
-    // Limpar cookies (importante para mobile)
-    document.cookie.split(";").forEach((c) => {
-      document.cookie = c
-        .replace(/^ +/, "")
-        .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-    });
 
     api.defaults.headers.Authorization = undefined;
     setIsAuth(false);
@@ -79,7 +72,7 @@ const usePortalAuth = () => {
     
     // Forçar recarregamento para limpar estados residuais
     window.location.href = "/portal/login";
-  };
+  }, []);
 
   return {
     isAuth,

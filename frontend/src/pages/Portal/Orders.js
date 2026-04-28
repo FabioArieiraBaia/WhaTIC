@@ -29,13 +29,13 @@ import "./Portal.css";
 const PortalOrders = () => {
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
-  const [client, setClient] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [logo, setLogo] = useState("");
   const [appName, setAppName] = useState("Portal");
   const { getPublicSetting } = useSettings();
   const history = useHistory();
+  const { isAuth, contact: client, handleLogout: portalLogout, loading: authLoading } = usePortalAuth();
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -51,16 +51,17 @@ const PortalOrders = () => {
   }, [getPublicSetting]);
 
   useEffect(() => {
-    const savedClient = localStorage.getItem("portal_client");
-    if (savedClient) {
-      const parsedClient = JSON.parse(savedClient);
-      setClient(parsedClient);
-      fetchOrders(parsedClient.id);
-      fetchProducts(parsedClient.companyId);
-    } else {
-      history.push("/portal/login");
+    if (!authLoading) {
+      if (isAuth) {
+        if (client?.id) {
+          fetchOrders(client.id);
+          fetchProducts(client.companyId);
+        }
+      } else {
+        history.push("/portal/login");
+      }
     }
-  }, [history]);
+  }, [isAuth, client, authLoading, history]);
 
   const fetchProducts = async (companyId) => {
     try {
@@ -92,8 +93,7 @@ const PortalOrders = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("portal_client");
-    history.push("/portal/login");
+    portalLogout();
   };
 
   const handleCreateOrder = async (productId) => {
