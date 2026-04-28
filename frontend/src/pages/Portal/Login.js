@@ -50,6 +50,9 @@ const PortalLogin = () => {
     const params = new URLSearchParams(location.search);
     const token = params.get("token");
     if (token) {
+      // Limpa o token da URL imediatamente para não causar loop infinito
+      history.replace(location.pathname);
+
       handleLogin({ token }).then(res => {
         if (res?.resetPassword) {
             toast.info("Acesso via link confirmado. Você pode definir uma nova senha agora.");
@@ -57,7 +60,7 @@ const PortalLogin = () => {
         }
       });
     }
-  }, [location, handleLogin]);
+  }, [location.search, handleLogin, history, location.pathname]);
 
   useEffect(() => {
     // Só redireciona se não estiver em primeiro acesso e estiver realmente autenticado
