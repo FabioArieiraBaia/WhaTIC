@@ -24,6 +24,7 @@ import { toast } from "react-toastify";
 import api from "../../services/api";
 import { getBackendURL } from "../../services/config";
 import useSettings from "../../hooks/useSettings";
+import usePortalAuth from "../../hooks/usePortalAuth";
 import "./Portal.css";
 
 const PortalOrders = () => {
