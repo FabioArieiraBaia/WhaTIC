@@ -107,9 +107,6 @@
 
 .promo-separator {
   opacity: 0.5;
-  [theme.breakpoints.down("sm")]: {
-    display: "none",
-  }
 }
 
 .promo-close {
