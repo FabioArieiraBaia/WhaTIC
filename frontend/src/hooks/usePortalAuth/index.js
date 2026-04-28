@@ -63,12 +63,22 @@ const usePortalAuth = () => {
   };
 
   const handleLogout = () => {
-    setIsAuth(false);
-    setContact({});
     localStorage.removeItem("portalToken");
     localStorage.removeItem("portalContact");
+    
+    // Limpar cookies (importante para mobile)
+    document.cookie.split(";").forEach((c) => {
+      document.cookie = c
+        .replace(/^ +/, "")
+        .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+    });
+
     api.defaults.headers.Authorization = undefined;
-    history.push("/portal/login");
+    setIsAuth(false);
+    setContact({});
+    
+    // Forçar recarregamento para limpar estados residuais
+    window.location.href = "/portal/login";
   };
 
   return {

@@ -60,6 +60,7 @@ const PortalLogin = () => {
   }, [location, handleLogin]);
 
   useEffect(() => {
+    // Só redireciona se não estiver em primeiro acesso e estiver realmente autenticado
     if (isAuth && mode !== "firstAccess") {
       history.push("/portal/orders");
     }
