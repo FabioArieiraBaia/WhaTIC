@@ -121,8 +121,14 @@ export const update = async (req: Request, res: Response): Promise<Response> => 
           message += `Você também pode ver o QR Code no portal: ${process.env.FRONTEND_URL}/portal/orders`;
         } else if (status === "PAGO") {
           message = `*Pedido #${order.id}*\nSeu pagamento foi confirmado! 🚀\nObrigado por confiar no nosso trabalho. ✨`;
+          if (finalVideoUrl) {
+            message += `\n\n⬇️ *Baixar Material:*\n${finalVideoUrl}`;
+          }
         } else if (status === "CONCLUIDO") {
           message = `*Pedido #${order.id}*\nPedido concluído com sucesso! Obrigado pela preferência. ✨`;
+          if (finalVideoUrl) {
+            message += `\n\n⬇️ *Baixar Material:*\n${finalVideoUrl}`;
+          }
         }
 
         if (message) {
