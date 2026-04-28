@@ -23,6 +23,7 @@ import { useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../services/api";
 import { getBackendURL } from "../../services/config";
+import useSettings from "../../hooks/useSettings";
 import "./Portal.css";
 
 const PortalOrders = () => {
@@ -31,7 +32,19 @@ const PortalOrders = () => {
   const [client, setClient] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [appName, setAppName] = useState("Portal");
+  const { getPublicSetting } = useSettings();
   const history = useHistory();
+
+  useEffect(() => {
+    const fetchAppName = async () => {
+      try {
+        const name = await getPublicSetting("appName");
+        if (name) setAppName(name);
+      } catch (e) {}
+    };
+    fetchAppName();
+  }, [getPublicSetting]);
 
   useEffect(() => {
     const savedClient = localStorage.getItem("portal_client");
@@ -184,7 +197,7 @@ const PortalOrders = () => {
         <Box className="portal-header" display="flex" justifyContent="space-between" alignItems="center">
           <Box display="flex" alignItems="center" gap={1}>
             <Typography className="logo-text" onClick={() => history.push("/portal")} style={{ cursor: 'pointer' }}>
-              WhaTIC
+              {appName}
             </Typography>
             <Typography variant="caption" style={{ color: '#64748b', marginLeft: 10 }}>
               | Dashboard
@@ -357,7 +370,7 @@ const PortalOrders = () => {
 
         <Box mt={10} textAlign="center">
           <Typography variant="caption" style={{ color: '#64748b' }}>
-            © 2026 WhaTIC. Plataforma Segura.
+            © 2026 {appName}. Plataforma Segura.
           </Typography>
         </Box>
       </Container>

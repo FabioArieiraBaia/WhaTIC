@@ -12,6 +12,7 @@ import {
 import { useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../services/api";
+import useSettings from "../../hooks/useSettings";
 import "./Portal.css";
 
 const PortalLogin = () => {
@@ -19,6 +20,14 @@ const PortalLogin = () => {
   const [countryCode, setCountryCode] = useState("55");
   const [loading, setLoading] = useState(false);
   const history = useHistory();
+  const [appName, setAppName] = useState("Portal");
+  const { getPublicSetting } = useSettings();
+
+  React.useEffect(() => {
+    getPublicSetting("appName").then((name) => {
+      if (name) setAppName(name);
+    }).catch(() => {});
+  }, [getPublicSetting]);
 
   const countries = [
     { code: "55", flag: "🇧🇷", name: "Brasil" },
@@ -58,7 +67,7 @@ const PortalLogin = () => {
       <Container maxWidth="xs">
         <Box className="glass-card animate-slide-up" p={4} textAlign="center">
           <Typography className="logo-text" variant="h4" gutterBottom style={{ marginBottom: 30 }}>
-            WhaTIC Portal
+            {appName}
           </Typography>
           <Typography variant="h6" style={{ marginBottom: 10, fontWeight: 600 }}>
             Acesso Rápido

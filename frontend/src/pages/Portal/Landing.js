@@ -8,17 +8,26 @@ import {
   Grid 
 } from "@material-ui/core";
 import { useHistory } from "react-router-dom";
+import useSettings from "../../hooks/useSettings";
 import "./Portal.css";
 
 const PortalLanding = () => {
   const history = useHistory();
+  const [appName, setAppName] = React.useState("Portal");
+  const { getPublicSetting } = useSettings();
+
+  React.useEffect(() => {
+    getPublicSetting("appName").then((name) => {
+      if (name) setAppName(name);
+    }).catch(() => {});
+  }, [getPublicSetting]);
 
   return (
     <div className="portal-container">
       <Container maxWidth="lg">
         {/* Header */}
         <Box className="portal-header" display="flex" justifyContent="space-between" alignItems="center">
-          <Typography className="logo-text">WhaTIC</Typography>
+          <Typography className="logo-text">{appName}</Typography>
           <Button 
             className="premium-button" 
             onClick={() => history.push("/portal/login")}
@@ -79,7 +88,7 @@ const PortalLanding = () => {
 
         <Box mt={10} textAlign="center" pb={5}>
           <Typography variant="body2" style={{ color: '#64748b' }}>
-            © 2026 WhaTIC. Todos os direitos reservados.
+            © 2026 {appName}. Todos os direitos reservados.
           </Typography>
         </Box>
       </Container>
