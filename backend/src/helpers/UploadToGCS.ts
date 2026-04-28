@@ -18,7 +18,6 @@ export const uploadToGCS = async (file: Express.Multer.File, folder: string = "p
 
     await bucket.upload(file.path, {
       destination,
-      public: true,
       metadata: {
         contentType: file.mimetype,
       },
