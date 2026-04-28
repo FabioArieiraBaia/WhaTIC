@@ -265,7 +265,7 @@
 	            await (theme === "dark" ? responses[1] : responses[0]).json();
 	          
 	          if (!logoSrc) {
-	            appLogo.src = `/vector/logo${theme === "dark" ? "-dark" : ""}.svg`;
+	            appLogo.src = `/vector/logo${theme === "dark" ? "-dark" : ""}.png`;
 	          } else {
 	            appLogo.src = backendUrl + "/public/" + (logoSrc || logoAltSrc);
 	          }
@@ -276,7 +276,7 @@
 	    fetch(settingsBaseUrl + "/appName")
 	        .then(response => response.json())
 	        .then(data => {
-	          document.title = data || "ticketz";
+	          document.title = data || "Iris Produções";
 	        });
     };
 		

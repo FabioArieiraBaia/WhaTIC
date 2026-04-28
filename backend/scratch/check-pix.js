@@ -9,10 +9,9 @@ const c = new Client({
 });
 
 c.connect()
-  .then(() => c.query(`SELECT so.id, so.status, so."productId", so."contactId", p.name, p."pixImageUrl", p."pixCopiaCola" FROM "ServiceOrders" so LEFT JOIN "Products" p ON so."productId" = p.id WHERE so.id = 15`))
+  .then(() => c.query(`UPDATE "ServiceOrders" SET "productId" = 1 WHERE id = 15 AND "productId" IS NULL RETURNING id, "productId", status`))
   .then(r => {
-    console.log("SERVICE ORDER #15:");
-    console.log(JSON.stringify(r.rows, null, 2));
+    console.log("UPDATED:", JSON.stringify(r.rows, null, 2));
     c.end();
   })
   .catch(e => {

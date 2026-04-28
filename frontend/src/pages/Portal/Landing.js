@@ -1,97 +1,80 @@
 
-import React from "react";
-import { 
-  Container, 
-  Box, 
-  Typography, 
-  Button, 
-  Grid 
-} from "@material-ui/core";
-import { useHistory } from "react-router-dom";
-import useSettings from "../../hooks/useSettings";
-import "./Portal.css";
+import React, { useEffect, useState } from "react";
+import { Helmet } from "react-helmet";
+import { makeStyles } from "@material-ui/core/styles";
+import IconButton from "@material-ui/core/IconButton";
+import CloseIcon from "@material-ui/icons/Close";
+import Hero from "../../components/Hero";
+import ServicesVideos from "../../components/ServicesVideos";
+import ServicesDev from "../../components/ServicesDev";
+import Team from "../../components/Team";
+import HowItWorks from "../../components/HowItWorks";
+import Footer from "../../components/Footer";
+import "./LandingPage.css";
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    backgroundColor: "#020617",
+    minHeight: "100vh",
+    fontFamily: "'Outfit', 'Inter', sans-serif",
+    color: "#fff",
+    overflowX: "hidden",
+    transition: "padding-top 0.3s ease",
+  },
+}));
+
+const PromotionBanner = ({ onClose }) => (
+  <div className="promo-banner">
+    <div className="promo-text">
+      <span>🚀 SUPER PROMOÇÃO: Seu primeiro vídeo de 30 segundos é GRATIS! Aproveite!!!</span>
+      <span className="promo-separator">|</span>
+      <span>🌐 Primeiro Site "simples" ONE PAGE GRATIS aproveite</span>
+    </div>
+    <IconButton className="promo-close" onClick={onClose} size="small">
+      <CloseIcon style={{ color: 'white', fontSize: '1.2rem' }} />
+    </IconButton>
+  </div>
+);
 
 const PortalLanding = () => {
-  const history = useHistory();
-  const [appName, setAppName] = React.useState("Portal");
-  const { getPublicSetting } = useSettings();
+  const classes = useStyles();
+  const [showPromo, setShowPromo] = useState(true);
 
-  React.useEffect(() => {
-    getPublicSetting("appName").then((name) => {
-      if (name) setAppName(name);
-    }).catch(() => {});
-  }, [getPublicSetting]);
+  useEffect(() => {
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: "0px 0px -50px 0px"
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+        }
+      });
+    }, observerOptions);
+
+    const revealElements = document.querySelectorAll('.reveal');
+    revealElements.forEach(el => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <div className="portal-container">
-      <Container maxWidth="lg">
-        {/* Header */}
-        <Box className="portal-header" display="flex" justifyContent="space-between" alignItems="center">
-          <Typography className="logo-text">{appName}</Typography>
-          <Button 
-            className="premium-button" 
-            onClick={() => history.push("/portal/login")}
-            style={{ padding: '8px 20px', fontSize: '0.8rem' }}
-          >
-            Acessar Pedidos
-          </Button>
-        </Box>
+    <div className={classes.root} style={{ paddingTop: showPromo ? '50px' : '0' }}>
+      <Helmet>
+        <title>Iris Produções | Vídeos Comerciais por IA & Desenvolvimento de Elite 2026</title>
+        <meta name="description" content="Líderes em tecnologia visual e desenvolvimento de sistemas de alta performance. Vídeos por IA e aplicações mobile de elite." />
+        <meta name="keywords" content="vídeos por ia, desenvolvimento de sistemas, iris produções, apps mobile, automação ia, 2026 tech" />
+      </Helmet>
 
-        {/* Hero Section */}
-        <Box className="landing-hero animate-slide-up">
-          <Typography className="hero-title">
-            Vídeos Profissionais <br /> 
-            <span style={{ color: 'var(--primary)' }}>Impulsionados por IA</span>
-          </Typography>
-          <Typography className="hero-subtitle">
-            Transforme suas ideias em realidade com vídeos de alta qualidade. 
-            Acompanhe cada etapa da produção e aprove seus resultados em tempo real.
-          </Typography>
-          <Box display="flex" gap={2}>
-            <Button 
-              className="premium-button" 
-              onClick={() => history.push("/portal/login")}
-              style={{ padding: '15px 40px' }}
-            >
-              Começar Agora
-            </Button>
-          </Box>
-        </Box>
-
-        {/* Features */}
-        <Grid container spacing={4} style={{ marginTop: 60 }}>
-          <Grid item xs={12} md={4}>
-            <Box className="glass-card" p={4} textAlign="center">
-              <Typography variant="h5" style={{ marginBottom: 15, fontWeight: 700 }}>Agilidade</Typography>
-              <Typography variant="body2" style={{ color: '#94a3b8' }}>
-                Processo de criação otimizado para entregar seus vídeos em tempo recorde.
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Box className="glass-card" p={4} textAlign="center">
-              <Typography variant="h5" style={{ marginBottom: 15, fontWeight: 700 }}>Qualidade IA</Typography>
-              <Typography variant="body2" style={{ color: '#94a3b8' }}>
-                Tecnologia de ponta para garantir resultados cinematográficos em cada frame.
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Box className="glass-card" p={4} textAlign="center">
-              <Typography variant="h5" style={{ marginBottom: 15, fontWeight: 700 }}>Transparência</Typography>
-              <Typography variant="body2" style={{ color: '#94a3b8' }}>
-                Acompanhe o status, faça revisões e realize pagamentos de forma segura no portal.
-              </Typography>
-            </Box>
-          </Grid>
-        </Grid>
-
-        <Box mt={10} textAlign="center" pb={5}>
-          <Typography variant="body2" style={{ color: '#64748b' }}>
-            © 2026 {appName}. Todos os direitos reservados.
-          </Typography>
-        </Box>
-      </Container>
+      {showPromo && <PromotionBanner onClose={() => setShowPromo(false)} />}
+      <Hero />
+      <ServicesVideos />
+      <ServicesDev />
+      <HowItWorks />
+      <Team />
+      <Footer />
     </div>
   );
 };

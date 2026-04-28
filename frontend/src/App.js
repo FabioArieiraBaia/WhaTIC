@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "react-query";
 
 import { ptBR } from "@material-ui/core/locale";
 import { createTheme, ThemeProvider } from "@material-ui/core/styles";
-import { useMediaQuery } from "@material-ui/core";
 import ColorModeContext from "./layout/themeContext";
 import { PhoneCallProvider } from "./context/PhoneCall/PhoneCallContext";
 import { SocketContext, socketManager } from './context/Socket/SocketContext';
@@ -18,7 +17,7 @@ import Routes from "./routes";
 const queryClient = new QueryClient();
 const defaultLogoLight = "/vector/logo.png";
 const defaultLogoDark = "/vector/logo-dark.png";
-const defaultLogoFavicon = "/vector/favicon.svg";
+const defaultLogoFavicon = "/vector/logo.png";
 
 function useViewportHeight() {
   useEffect(() => {
@@ -271,8 +270,8 @@ const App = () => {
     getPublicSetting("appLogoFavicon")
       .then((file) => { setAppLogoFavicon(file ? (`${getBackendURL()}/public/${file}`) : null) })
       .catch((error) => { console.log("Error reading setting", error); });
-    getPublicSetting("appName").then((name) => { setAppName(name || "ticketz") })
-      .catch((error) => { console.log("Error reading setting", error); setAppName("whitelabel chat") });
+    getPublicSetting("appName").then((name) => { setAppName(name || "Iris Produções") })
+      .catch((error) => { console.log("Error reading setting", error); setAppName("Iris Produções") });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
