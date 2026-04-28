@@ -2,7 +2,7 @@ import { sign } from "jsonwebtoken";
 import authConfig from "../../config/auth";
 import Contact from "../../models/Contact";
 import AppError from "../../errors/AppError";
-import CreateMessageService from "../MessageServices/CreateMessageService";
+import SendWhatsAppMessage from "../WbotServices/SendWhatsAppMessage";
 import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketService";
 import Whatsapp from "../../models/Whatsapp";
 import { Op } from "sequelize";
@@ -58,18 +58,12 @@ const MagicLinkService = async ({
     const { ticket } = await FindOrCreateTicketService(contact, whatsapp.id, companyId);
     const body = `*Acesso ao Portal*\n\nOlá ${contact.name}! Clique no link abaixo para acessar sua conta de forma segura:\n\n${portalUrl}\n\n_Este link expira em 15 minutos._`;
 
-    await CreateMessageService({
-      messageData: {
-        id: `magic_link_${contact.id}_${Date.now()}`,
-        ticketId: ticket.id,
-        contactId: contact.id,
-        body,
-        fromMe: true,
-        read: true
-      },
-      companyId
+    await SendWhatsAppMessage({
+      body,
+      ticket
     });
-    console.log(`[MagicLink] Mensagem enviada com sucesso.`);
+
+    console.log(`[MagicLink] Mensagem enviada com sucesso via rede WhatsApp.`);
   } catch (err) {
     console.error("[MagicLink Error]", err);
     throw err;

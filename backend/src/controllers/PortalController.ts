@@ -7,6 +7,7 @@ import Ticket from "../models/Ticket";
 import Whatsapp from "../models/Whatsapp";
 import CreateMessageService from "../services/MessageServices/CreateMessageService";
 import FindOrCreateTicketService from "../services/TicketServices/FindOrCreateTicketService";
+import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import AppError from "../errors/AppError";
 import { formatProductUrls, getFullUrl } from "../helpers/FormatProductUrls";
 import { uploadToGCS } from "../helpers/UploadToGCS";
@@ -193,16 +194,9 @@ export const approveOrder = async (req: Request, res: Response): Promise<Respons
         const { ticket } = await FindOrCreateTicketService(contact, whatsapp.id, companyId);
         const message = `*Pedido #${order.id}*\n🎬 Seu vídeo está pronto!\n\nAcesse nossa plataforma e conclua o pagamento no link abaixo:\n${process.env.FRONTEND_URL}/portal/orders\n\n${product.pixCopiaCola ? `*Chave PIX (Copia e Cola):*\n${product.pixCopiaCola}\n\n` : ""}Assim que o pagamento for aprovado, você poderá fazer o download do seu vídeo. ✨`;
 
-        await CreateMessageService({
-          messageData: {
-            id: `portal_approve_${order.id}_${Date.now()}`,
-            ticketId: ticket.id,
-            contactId: contact.id,
-            body: message,
-            fromMe: true,
-            read: true
-          },
-          companyId
+        await SendWhatsAppMessage({
+          body: message,
+          ticket
         });
       }
     }
