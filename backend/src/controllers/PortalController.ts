@@ -10,41 +10,132 @@ import FindOrCreateTicketService from "../services/TicketServices/FindOrCreateTi
 import AppError from "../errors/AppError";
 import { formatProductUrls, getFullUrl } from "../helpers/FormatProductUrls";
 import { uploadToGCS } from "../helpers/UploadToGCS";
+import AuthContactService from "../services/ContactServices/AuthContactService";
+import MagicLinkService from "../services/ContactServices/MagicLinkService";
+import { verify } from "jsonwebtoken";
+import authConfig from "../config/auth";
+import { SerializeContact } from "../helpers/SerializeContact";
+import Company from "../models/Company";
+import { Op } from "sequelize";
 
 export const login = async (req: Request, res: Response): Promise<Response> => {
-  const { number } = req.body;
+  const { number, password, token } = req.body;
+
+  if (token) {
+    // Magic Link Login
+    try {
+      const decoded: any = verify(token, authConfig.secret);
+      if (decoded.action !== "magic-link") {
+        throw new AppError("Invalid token action", 401);
+      }
+      const contact = await Contact.findByPk(decoded.contactId, {
+        include: [Company]
+      });
+      if (!contact) {
+        throw new AppError("Contact not found", 404);
+      }
+
+      if (decoded.action === "magic-link") {
+        await contact.update({ isVerified: true });
+      }
+
+      const { serializedContact, token: accessToken, refreshToken } = await AuthContactService({ number: contact.number });
+
+      return res.json({
+        contact: serializedContact,
+        token: accessToken,
+        refreshToken,
+        contactId: contact.id,
+        resetPassword: decoded.action === "magic-link" 
+      });
+    } catch (err) {
+      throw new AppError("Link de acesso expirado ou inválido", 401);
+    }
+  }
 
   if (!number) {
     throw new AppError("Número de telefone é obrigatório", 400);
   }
 
-  // Clean the input number
+  // Se não tem senha, verificar se é o primeiro acesso
   const cleanNumber = number.replace(/\D/g, "");
-
-  // Try to find the contact with exact match or matching the end of the number
-  const contact = await Contact.findOne({
+  const contact = await Contact.findOne({ 
     where: { 
-      number: cleanNumber
-    }
-  }) || await Contact.findOne({
-    where: {
-      number: {
-        [require("sequelize").Op.like]: `%${cleanNumber}`
-      }
-    }
+      [Op.or]: [
+        { number: cleanNumber },
+        { number: { [Op.like]: `%${cleanNumber}` } }
+      ]
+    } 
   });
 
   if (!contact) {
-    throw new AppError("Cliente não encontrado. Certifique-se de usar o número cadastrado no WhatsApp.", 404);
+    throw new AppError("Cliente não encontrado", 404);
   }
 
-  // Simple tokenless auth for local dev portal
+  if (!contact.passwordHash) {
+    return res.json({ firstAccess: true, contactId: contact.id });
+  }
+
+  if (!password) {
+    throw new AppError("Senha é obrigatória", 400);
+  }
+
+  const { serializedContact, token: accessToken, refreshToken } = await AuthContactService({ number, password });
+
   return res.json({
-    id: contact.id,
-    name: contact.name,
-    number: contact.number,
-    companyId: contact.companyId
+    contact: serializedContact,
+    token: accessToken,
+    refreshToken
   });
+};
+
+export const requestMagicLink = async (req: Request, res: Response): Promise<Response> => {
+  const { number, companyId } = req.body;
+  if (!number) {
+    throw new AppError("O número é obrigatório", 400);
+  }
+
+  await MagicLinkService({ number, companyId });
+
+  return res.json({ message: "Link enviado com sucesso" });
+};
+
+export const setInitialPassword = async (req: Request, res: Response): Promise<Response> => {
+  const { contactId, password, confirmPassword } = req.body;
+
+  if (password !== confirmPassword) {
+    throw new AppError("As senhas não coincidem", 400);
+  }
+
+  const contact = await Contact.findByPk(contactId);
+  if (!contact) {
+    throw new AppError("Cliente não encontrado", 404);
+  }
+
+  await contact.update({ password, isVerified: false });
+
+  // Enviar link de confirmação via WhatsApp
+  await MagicLinkService({ 
+    number: contact.number, 
+    companyId: contact.companyId 
+  });
+
+  return res.status(200).json({ message: "Senha criada. Verifique seu WhatsApp para confirmar o acesso." });
+};
+
+export const me = async (req: Request, res: Response): Promise<Response> => {
+  const { id } = req.user;
+  const contact = await Contact.findByPk(id, {
+    include: [Company]
+  });
+
+  if (!contact) {
+    throw new AppError("ERR_UNAUTHORIZED", 401);
+  }
+
+  const serializedContact = await SerializeContact(contact);
+
+  return res.json(serializedContact);
 };
 
 export const listOrders = async (req: Request, res: Response): Promise<Response> => {

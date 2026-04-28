@@ -13,8 +13,12 @@ import {
   ForeignKey,
   BelongsTo,
   BelongsToMany,
-  HasOne
+  HasOne,
+  BeforeUpdate,
+  BeforeCreate,
+  DataType
 } from "sequelize-typescript";
+import { hash, compare } from "bcryptjs";
 import ContactCustomField from "./ContactCustomField";
 import Ticket from "./Ticket";
 import Company from "./Company";
@@ -68,6 +72,20 @@ class Contact extends Model {
   @Column
   language: string;
 
+  @Column(DataType.VIRTUAL)
+  password: string;
+
+  @Column
+  passwordHash: string;
+
+  @Default(0)
+  @Column
+  tokenVersion: number;
+
+  @Default(false)
+  @Column
+  isVerified: boolean;
+
   @CreatedAt
   createdAt: Date;
 
@@ -108,6 +126,18 @@ class Contact extends Model {
 
   @HasMany(() => ServiceOrder)
   serviceOrders: ServiceOrder[];
+
+  @BeforeUpdate
+  @BeforeCreate
+  static hashPassword = async (instance: Contact): Promise<void> => {
+    if (instance.password) {
+      instance.passwordHash = await hash(instance.password, 8);
+    }
+  };
+
+  public checkPassword = async (password: string): Promise<boolean> => {
+    return compare(password, this.getDataValue("passwordHash"));
+  };
 }
 
 export default Contact;

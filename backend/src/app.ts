@@ -71,6 +71,7 @@ app.use((req, _res, next) => {
   next();
 });
 
+app.get("/ping-portal", (req, res) => res.send("Portal Online!"));
 app.use(routes);
 
 app.use(Sentry.Handlers.errorHandler());

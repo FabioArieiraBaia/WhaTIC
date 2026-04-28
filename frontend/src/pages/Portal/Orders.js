@@ -32,18 +32,22 @@ const PortalOrders = () => {
   const [client, setClient] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [logo, setLogo] = useState("");
   const [appName, setAppName] = useState("Portal");
   const { getPublicSetting } = useSettings();
   const history = useHistory();
 
   useEffect(() => {
-    const fetchAppName = async () => {
+    const fetchSettings = async () => {
       try {
         const name = await getPublicSetting("appName");
         if (name) setAppName(name);
+
+        const logoFile = await getPublicSetting("appLogoDark");
+        if (logoFile) setLogo(`${getBackendURL()}/public/${logoFile}`);
       } catch (e) {}
     };
-    fetchAppName();
+    fetchSettings();
   }, [getPublicSetting]);
 
   useEffect(() => {
@@ -196,9 +200,18 @@ const PortalOrders = () => {
         {/* Header */}
         <Box className="portal-header" display="flex" justifyContent="space-between" alignItems="center">
           <Box display="flex" alignItems="center" gap={1}>
-            <Typography className="logo-text" onClick={() => history.push("/portal")} style={{ cursor: 'pointer' }}>
-              {appName}
-            </Typography>
+            {logo ? (
+              <img 
+                src={logo} 
+                alt={appName} 
+                style={{ height: '30px', cursor: 'pointer' }} 
+                onClick={() => history.push("/portal")} 
+              />
+            ) : (
+              <Typography className="logo-text" onClick={() => history.push("/portal")} style={{ cursor: 'pointer' }}>
+                {appName}
+              </Typography>
+            )}
             <Typography variant="caption" style={{ color: '#64748b', marginLeft: 10 }}>
               | Dashboard
             </Typography>

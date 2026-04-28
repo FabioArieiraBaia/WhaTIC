@@ -134,3 +134,27 @@
   max-width: 600px;
   margin-bottom: 40px;
 }
+
+.input-glass-container {
+  margin-bottom: 20px; 
+  background-color: rgba(255,255,255,0.05); 
+  border-radius: 12px;
+  padding: 5px 15px;
+  border: 1px solid var(--glass-border);
+}
+
+.country-select {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 1rem;
+  outline: none;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.country-option {
+  background: #1e293b;
+  color: white;
+}
