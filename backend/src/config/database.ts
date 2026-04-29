@@ -1,5 +1,8 @@
 import "../bootstrap";
 
+const dbHost = process.env.DB_HOST;
+const isSocket = dbHost && dbHost.startsWith("/cloudsql");
+
 module.exports = {
   define: {
     charset: "utf8mb4",
@@ -13,7 +16,7 @@ module.exports = {
   },
   dialect: process.env.DB_DIALECT || "postgres",
   timezone: process.env.DB_TIMEZONE || "-03:00",
-  host: process.env.DB_HOST,
+  host: isSocket ? undefined : dbHost,
   port: process.env.DB_PORT || 5432,
   database: process.env.DB_NAME,
   username: process.env.DB_USER,
@@ -21,7 +24,8 @@ module.exports = {
   logging: process.env.DB_DEBUG && console.log,
   seederStorage: "sequelize",
   dialectOptions: {
-    ssl: (process.env.NODE_ENV === "production" || process.env.DB_SSL === "true") ? {
+    socketPath: isSocket ? dbHost : undefined,
+    ssl: (!isSocket && (process.env.NODE_ENV === "production" || process.env.DB_SSL === "true")) ? {
       require: true,
       rejectUnauthorized: false
     } : false

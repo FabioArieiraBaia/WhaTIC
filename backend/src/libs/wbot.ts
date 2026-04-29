@@ -290,11 +290,10 @@ export const initWASocket = async (
             keys: state.keys
           },
           version,
-          defaultQueryTimeoutMs: 60000,
-          // retryRequestDelayMs: 250,
-          // keepAliveIntervalMs: 1000 * 60 * 10 * 3,
+          defaultQueryTimeoutMs: 30000,
+          retryRequestDelayMs: 500,
+          keepAliveIntervalMs: 15000,
           msgRetryCounterCache,
-          // syncFullHistory: true,
           generateHighQualityLinkPreview: true,
           getMessage,
           agent: proxy,
@@ -302,7 +301,7 @@ export const initWASocket = async (
           cachedGroupMetadata: async jid => groupCache.get(jid),
           shouldIgnoreJid: jid =>
             isJidBroadcast(jid) || jid?.endsWith("@newsletter"),
-          transactionOpts: { maxCommitRetries: 1, delayBetweenTriesMs: 10 }
+          transactionOpts: { maxCommitRetries: 2, delayBetweenTriesMs: 50 }
         });
 
         wsocket.ev.on("call", async event => {
@@ -362,16 +361,21 @@ export const initWASocket = async (
                     session: whatsapp
                   }
                 );
+                
+                const delay = 5000; // Increased to 5s for Cloud Run stability
                 removeWbot(id, false).then(() => {
-                  logger.info(`Reconnecting ${name} in 2 seconds`);
+                  logger.info(`Reconnecting ${name} in ${delay/1000} seconds...`);
                   setTimeout(async () => {
                     await whatsapp.reload();
-                    await StartWhatsAppSession(
-                      whatsapp,
-                      whatsapp.companyId,
-                      true
-                    );
-                  }, 2000);
+                    // Avoid multiple reconnection attempts if status already changed
+                    if (whatsapp.status !== "CONNECTED" && whatsapp.status !== "DISCONNECTED") {
+                      await StartWhatsAppSession(
+                        whatsapp,
+                        whatsapp.companyId,
+                        true
+                      );
+                    }
+                  }, delay);
                 });
               } else {
                 // logged out
