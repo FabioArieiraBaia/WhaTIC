@@ -567,48 +567,6 @@ async function handleEveryMinute(job: Job) {
   }
 }
 
-const createInvoices = new CronJob("0 * * * * *", async () => {
-  const companies = await Company.findAll();
-  companies.map(async c => {
-    const dueDate = new Date(c.dueDate);
-    const today = new Date();
-    const diffTime = dueDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays < 20) {
-      const plan = await Plan.findByPk(c.planId);
-
-      const invoiceCount = await Invoices.count({
-        where: {
-          companyId: c.id,
-          dueDate: {
-            [Op.like]: `${dueDate.toISOString().split("T")[0]}%`
-          }
-        }
-      });
-
-      if (invoiceCount === 0) {
-        await Invoices.destroy({
-          where: {
-            companyId: c.id,
-            status: "open"
-          }
-        });
-        await Invoices.create({
-          detail: plan.name,
-          status: "open",
-          value: plan.value,
-          currency: plan.currency || "",
-          dueDate: dueDate.toISOString().split("T")[0],
-          companyId: c.id
-        });
-      }
-    }
-  });
-});
-
-createInvoices.start();
-
 export async function startQueueProcess() {
   logger.info("Starting queue processing");
 
@@ -628,7 +586,7 @@ export async function startQueueProcess() {
     "Verify",
     {},
     {
-      repeat: { cron: "*/5 * * * * *" },
+      repeat: { cron: "*/30 * * * * *" },
       removeOnComplete: true
     }
   );
