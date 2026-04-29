@@ -502,19 +502,5 @@ async function handleDispatchCampaign(job) {
 }
 
 export async function startCampaignQueues() {
-  campaignQueue.process("VerifyCampaignsDatabase", handleVerifyCampaigns);
-  campaignQueue.process("ProcessCampaign", handleProcessCampaign);
-  campaignQueue.process("DispatchCampaign", handleDispatchCampaign);
-  campaignQueue.process("DispatchConfirmedCampaign", handleDispatchCampaign);
-
-  /*
-  campaignQueue.add(
-    "VerifyCampaignsDatabase",
-    {},
-    {
-      repeat: { cron: "*/20 * * * * *" },
-      removeOnComplete: true
-    }
-  );
-  */
+  // Campanhas desativadas por solicitação do usuário para economia de recursos
 }
