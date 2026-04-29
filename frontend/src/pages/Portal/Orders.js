@@ -35,10 +35,23 @@ const PortalOrders = () => {
   useEffect(() => {
     const savedClient = localStorage.getItem("portal_client");
     if (savedClient) {
-      const parsedClient = JSON.parse(savedClient);
-      setClient(parsedClient);
-      fetchOrders(parsedClient.id);
-      fetchProducts(parsedClient.companyId);
+      try {
+        const parsedClient = JSON.parse(savedClient);
+        const contactId = parsedClient.id || parsedClient.contactId;
+        const companyId = parsedClient.companyId;
+
+        if (contactId && companyId) {
+          setClient(parsedClient);
+          fetchOrders(contactId);
+          fetchProducts(companyId);
+        } else {
+          console.error("Dados do cliente incompletos:", parsedClient);
+          history.push("/portal/login");
+        }
+      } catch (e) {
+        console.error("Erro ao ler dados do portal:", e);
+        history.push("/portal/login");
+      }
     } else {
       history.push("/portal/login");
     }

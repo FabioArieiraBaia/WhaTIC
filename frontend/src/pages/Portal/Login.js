@@ -8,14 +8,14 @@ import {
   Button, 
   CircularProgress
 } from "@material-ui/core";
-import { WhatsApp, CheckCircle } from "@material-ui/icons";
+import { WhatsApp, CheckCircle, Lock } from "@material-ui/icons";
 import { useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../services/api";
 import "./Portal.css";
 
 const PortalLogin = () => {
-  const [step, setStep] = useState(1); // 1: Number entry, 2: Success message
+  const [step, setStep] = useState(1); 
   const [number, setNumber] = useState("");
   const [countryCode, setCountryCode] = useState("55");
   const [loading, setLoading] = useState(false);
@@ -40,17 +40,18 @@ const PortalLogin = () => {
       const cleanNumber = number.replace(/\D/g, "");
       const fullNumber = countryCode + cleanNumber;
       
-      // Step 1: Check contact and trigger Magic Link if needed
       const { data } = await api.post("/portal/login", { number: fullNumber });
       
+      // Ajuste na lógica para bater com o Backend
       if (data.action === "SEND_MAGIC_LINK" || data.firstAccess) {
-        // Trigger Magic Link automatically
-        await api.post("/portal/magic-link", { number: fullNumber, companyId: 1 });
+        // CORREÇÃO: Rota correta do backend
+        await api.post("/portal/request-magic-link", { number: fullNumber, companyId: 1 });
         setStep(2);
       } else if (data.token) {
-        // Direct login if already authenticated or other cases
-        localStorage.setItem("portal_client", JSON.stringify(data.contact));
-        localStorage.setItem("token", data.token);
+        // CORREÇÃO: Garantir que o token e o contato sejam salvos corretamente
+        const contactData = data.contact || data.serializedContact;
+        localStorage.setItem("portal_client", JSON.stringify(contactData));
+        localStorage.setItem("token", JSON.stringify(data.token)); // Algumas versões do axios aqui usam JSON stringified
         history.push("/portal/orders");
       }
     } catch (err) {
@@ -73,13 +74,13 @@ const PortalLogin = () => {
               <Typography variant="h5" style={{ marginBottom: 12, fontWeight: 800, letterSpacing: '-0.5px' }}>
                 Portal do Cliente
               </Typography>
-              <Typography variant="body2" style={{ color: '#94a3b8', marginBottom: 40, lineHeight: 1.6 }}>
-                Acompanhe suas produções cinematográficas. Digite seu WhatsApp para receber o link de acesso.
+              <Typography variant="body2" style={{ color: '#94a3b8', marginBottom: 30, lineHeight: 1.6 }}>
+                Digite seu número de WhatsApp abaixo para receber um <strong>link seguro</strong> de acesso instantâneo.
               </Typography>
 
               <form onSubmit={handleLoginAttempt}>
                 <Box display="flex" alignItems="center" style={{ 
-                  marginBottom: 24, 
+                  marginBottom: 16, 
                   backgroundColor: 'rgba(0,0,0,0.2)', 
                   borderRadius: 16,
                   padding: '8px 20px',
@@ -97,11 +98,16 @@ const PortalLogin = () => {
                   <TextField
                     variant="standard"
                     fullWidth
-                    placeholder="Número com DDD"
+                    placeholder="Seu WhatsApp"
                     value={number}
                     onChange={(e) => setNumber(e.target.value)}
                     InputProps={{ disableUnderline: true, style: { color: 'white', fontSize: '1.05rem', fontWeight: 500 }}}
                   />
+                </Box>
+
+                <Box display="flex" alignItems="center" justifyContent="center" mb={3} style={{ color: 'var(--success)', opacity: 0.8 }}>
+                  <Lock style={{ fontSize: 14, marginRight: 6 }} />
+                  <Typography variant="caption" style={{ fontWeight: 600 }}>Conexão Segura e Criptografada</Typography>
                 </Box>
                 
                 <Button
@@ -109,9 +115,10 @@ const PortalLogin = () => {
                   fullWidth
                   type="submit"
                   disabled={loading}
-                  style={{ height: 56, fontSize: '1.1rem' }}
+                  startIcon={!loading && <WhatsApp />}
+                  style={{ height: 60, fontSize: '1.1rem', background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)' }}
                 >
-                  {loading ? <CircularProgress size={24} color="inherit" /> : "Receber Link de Acesso"}
+                  {loading ? <CircularProgress size={24} color="inherit" /> : "Entrar via WhatsApp"}
                 </Button>
               </form>
             </>
@@ -122,7 +129,7 @@ const PortalLogin = () => {
                 Link Enviado!
               </Typography>
               <Typography variant="body2" style={{ color: '#94a3b8', marginBottom: 30, lineHeight: 1.6 }}>
-                Enviamos um link de acesso seguro para o seu WhatsApp. Clique no link para entrar no portal automaticamente.
+                Enviamos uma mensagem para o seu WhatsApp com o link de acesso. Verifique seu aplicativo agora.
               </Typography>
               <Button 
                 onClick={() => setStep(1)}
@@ -133,16 +140,16 @@ const PortalLogin = () => {
             </Box>
           )}
 
-          <Box mt={5}>
+          <Box mt={4} pt={2} style={{ borderTop: '1px solid var(--glass-border)' }}>
             <Typography variant="caption" style={{ color: '#64748b', display: 'block', marginBottom: 8 }}>
-              Dúvidas? Fale com nosso suporte
+              Ainda não é cliente?
             </Typography>
             <Button 
               size="small" 
               style={{ color: 'var(--primary)', fontWeight: 700, textTransform: 'none' }}
               onClick={() => window.open("https://wa.me/5524993050256", "_blank")}
             >
-              Suporte Iris
+              Falar com Consultor Iris
             </Button>
           </Box>
         </Box>

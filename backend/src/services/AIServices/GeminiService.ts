@@ -20,8 +20,8 @@ export const GeminiService = async (
     return "Desculpe, meu sistema de inteligência está temporariamente indisponível (chave ausente no painel).";
   }
 
-  // Modelo Gemini 2.5 Flash como padrão para 2026
-  const aiAgentModel = settings.find(s => s.key === "aiAgentModel")?.value || "gemini-2.5-flash";
+  // Modelo Gemini 2.0 Flash como padrão multimodal
+  const aiAgentModel = settings.find(s => s.key === "aiAgentModel")?.value || "gemini-2.0-flash";
   const genAI = new GoogleGenerativeAI(geminiKey);
   const model = genAI.getGenerativeModel({ model: aiAgentModel });
 
