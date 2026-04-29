@@ -200,7 +200,7 @@ const PortalLogin = () => {
                 {authLoading || localLoading ? (
                   <CircularProgress size={24} color="inherit" />
                 ) : (
-                  "RECEBER LINK NO WHATSAPP"
+                  "Entre com WhatsApp \"Magic Link\""
                 )}
               </Button>
             </form>
