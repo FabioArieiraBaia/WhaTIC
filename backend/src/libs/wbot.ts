@@ -8,7 +8,8 @@ import makeWASocket, {
   WAMessageContent,
   proto,
   jidNormalizedUser,
-  BinaryNode
+  BinaryNode,
+  fetchLatestWaWebVersion
 } from "libzapitu-rf";
 
 import { Boom } from "@hapi/boom";
@@ -152,28 +153,11 @@ export const initWASocket = async (
 
         const { id, name, provider } = whatsappUpdate;
 
-        const autoVersion = await waVersionMutex.runExclusive(async () => {
-          let wv = waVersionCache.get("waVersion");
-
-          if (!wv) {
-            wv = await getProjectWAVersion();
-
-            if (!wv) {
-              // anything will be greater
-              return [2, 2300, 0];
-            }
-
-            waVersionCache.set("waVersion", wv);
-          }
-
-          return wv;
+        const { version, isLatest } = await fetchLatestWaWebVersion().catch(() => {
+          return { version: waVersion, isLatest: false };
         });
 
-        const isLegacy = provider === "stable";
-
-        const version = getGreaterVersion(autoVersion, waVersion);
-
-        logger.info(`using WA v${version.join(".")}`);
+        logger.info(`using WA v${version.join(".")} (isLatest: ${isLatest})`);
         logger.info(`isLegacy: ${isLegacy}`);
         logger.info(`Starting session ${name}`);
         let retriesQrCode = 0;
@@ -290,7 +274,7 @@ export const initWASocket = async (
             keys: state.keys
           },
           version,
-          defaultQueryTimeoutMs: 30000,
+          defaultQueryTimeoutMs: 60000,
           retryRequestDelayMs: 500,
           keepAliveIntervalMs: 15000,
           msgRetryCounterCache,
@@ -301,7 +285,7 @@ export const initWASocket = async (
           cachedGroupMetadata: async jid => groupCache.get(jid),
           shouldIgnoreJid: jid =>
             isJidBroadcast(jid) || jid?.endsWith("@newsletter"),
-          transactionOpts: { maxCommitRetries: 2, delayBetweenTriesMs: 50 }
+          transactionOpts: { maxCommitRetries: 3, delayBetweenTriesMs: 100 }
         });
 
         wsocket.ev.on("call", async event => {
@@ -362,7 +346,7 @@ export const initWASocket = async (
                   }
                 );
                 
-                const delay = 5000; // Increased to 5s for Cloud Run stability
+                const delay = 7000; // Increased to 7s for Cloud Run stability
                 removeWbot(id, false).then(() => {
                   logger.info(`Reconnecting ${name} in ${delay/1000} seconds...`);
                   setTimeout(async () => {
