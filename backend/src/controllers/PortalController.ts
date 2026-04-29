@@ -78,7 +78,7 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
   }
 
   if (!password) {
-    throw new AppError("Senha é obrigatória", 400);
+    return res.json({ action: "SEND_MAGIC_LINK", contactId: contact.id });
   }
 
   const { serializedContact, token: accessToken, refreshToken } = await AuthContactService({ number, password });
