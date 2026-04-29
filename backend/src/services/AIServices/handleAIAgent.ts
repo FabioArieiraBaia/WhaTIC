@@ -63,7 +63,8 @@ const handleAIAgent = async (
       ticket.id,
       ticket.companyId,
       bodyMessage,
-      history.reverse()
+      history.reverse(),
+      mediaData
     );
 
     // Check for [SEND_AUDIO_ID] trigger
