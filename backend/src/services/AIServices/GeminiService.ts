@@ -9,7 +9,8 @@ export const GeminiService = async (
   ticketId: number,
   companyId: number,
   userMessage: string,
-  history: any[] = []
+  history: any[] = [],
+  mediaData: any = null
 ): Promise<string> => {
   const settings = await Setting.findAll({ where: { companyId } });
   const geminiKey = settings.find(s => s.key === "geminiApiKey")?.value || "";
@@ -19,7 +20,8 @@ export const GeminiService = async (
     return "Desculpe, meu sistema de inteligência está temporariamente indisponível (chave ausente no painel).";
   }
 
-  const aiAgentModel = settings.find(s => s.key === "aiAgentModel")?.value || "gemini-1.5-pro";
+  // Modelo Gemini 2.5 Flash como padrão para 2026
+  const aiAgentModel = settings.find(s => s.key === "aiAgentModel")?.value || "gemini-2.5-flash";
   const genAI = new GoogleGenerativeAI(geminiKey);
   const model = genAI.getGenerativeModel({ model: aiAgentModel });
 
@@ -79,8 +81,28 @@ Mensagem Atual do Cliente: ${userMessage}
 Responda como o assistente virtual seguindo o system prompt:
 `;
 
-  const result = await model.generateContent([systemPrompt, prompt]);
-  const response = await result.response;
-  return response.text();
+  // No Gemini 2.5, todas as entradas devem ser Partes (objetos)
+  const parts: any[] = [
+    { text: systemPrompt },
+    { text: prompt }
+  ];
+
+  if (mediaData && mediaData.base64 && mediaData.mimeType) {
+    logger.info(`[GeminiService] Processando mídia multimodal (${mediaData.mimeType}) com Gemini 2.5`);
+    parts.push({
+      inlineData: {
+        data: mediaData.base64,
+        mimeType: mediaData.mimeType
+      }
+    });
+  }
+
+  try {
+    const result = await model.generateContent(parts);
+    const response = await result.response;
+    return response.text();
+  } catch (err) {
+    logger.error(`[GeminiService] Erro na geração multimodal Gemini 2.5: ${err.message}`);
+    return "Desculpe, tive uma instabilidade ao processar seu arquivo. Pode tentar novamente?";
+  }
 };
-  
