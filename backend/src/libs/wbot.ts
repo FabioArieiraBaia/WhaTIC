@@ -151,11 +151,11 @@ export const initWASocket = async (
 
         if (!whatsappUpdate) return;
 
-        const { id, name, provider } = whatsappUpdate;
-
-        const { version, isLatest } = await fetchLatestWaWebVersion().catch(() => {
+        const { version, isLatest } = await fetchLatestWaWebVersion({ defaultVersion: waVersion }).catch(() => {
           return { version: waVersion, isLatest: false };
         });
+
+        const isLegacy = provider === "stable";
 
         logger.info(`using WA v${version.join(".")} (isLatest: ${isLatest})`);
         logger.info(`isLegacy: ${isLegacy}`);
@@ -273,7 +273,7 @@ export const initWASocket = async (
             creds: state.creds,
             keys: state.keys
           },
-          version,
+          version: version as any,
           defaultQueryTimeoutMs: 60000,
           retryRequestDelayMs: 500,
           keepAliveIntervalMs: 15000,
