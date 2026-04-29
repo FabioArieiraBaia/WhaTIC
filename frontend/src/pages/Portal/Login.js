@@ -194,13 +194,14 @@ const PortalLogin = () => {
                 className="premium-button"
                 fullWidth
                 type="submit"
+                startIcon={<WhatsApp />}
                 disabled={authLoading || localLoading}
-                style={{ height: 50, marginTop: 30 }}
+                style={{ height: 56, marginTop: 30 }}
               >
                 {authLoading || localLoading ? (
                   <CircularProgress size={24} color="inherit" />
                 ) : (
-                  "Entre com WhatsApp \"Magic Link\""
+                  "Acessar com Magic Link"
                 )}
               </Button>
             </form>
