@@ -193,29 +193,7 @@ const PortalLogin = () => {
                 </Box>
               )}
 
-              {(mode === "login" || mode === "firstAccess") && (
-                <Box className="input-glass-container" mt={2}>
-                  <TextField
-                    variant="standard"
-                    fullWidth
-                    type={showPassword ? "text" : "password"}
-                    placeholder={mode === "firstAccess" ? "Crie uma Senha" : "Sua Senha"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    InputProps={{
-                      disableUnderline: true,
-                      style: { color: 'white' },
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton onClick={() => setShowPassword(!showPassword)} style={{ color: '#94a3b8' }}>
-                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </InputAdornment>
-                      )
-                    }}
-                  />
-                </Box>
-              )}
+
 
               {mode === "firstAccess" && (
                 <Box className="input-glass-container" mt={2}>
@@ -234,44 +212,25 @@ const PortalLogin = () => {
                 </Box>
               )}
 
-              {mode === "login" && (
-                <Box textAlign="right" mt={-1} mb={2}>
-                  <Button 
-                    onClick={handleRequestMagicLink}
-                    style={{ color: '#94a3b8', textTransform: 'none', fontSize: '0.8rem' }}
-                  >
-                    Esqueci minha senha
-                  </Button>
-                </Box>
-              )}
+
 
               <Button
                 className="premium-button"
                 fullWidth
-                type="submit"
+                onClick={mode === "login" ? handleRequestMagicLink : handleAuth}
                 disabled={authLoading || localLoading}
                 style={{ height: 50, marginTop: 30 }}
               >
                 {authLoading || localLoading ? (
                   <CircularProgress size={24} color="inherit" />
                 ) : (
-                  mode === "firstAccess" ? "Salvar e Confirmar no WhatsApp" : "Entrar"
+                  mode === "firstAccess" ? "Salvar e Confirmar no WhatsApp" : "RECEBER LINK NO WHATSAPP"
                 )}
               </Button>
             </form>
           )}
 
-          {mode === "login" && (
-            <Button
-              startIcon={<WhatsApp />}
-              fullWidth
-              onClick={handleRequestMagicLink}
-              disabled={localLoading}
-              style={{ marginTop: 15, color: '#25D366', textTransform: 'none', fontWeight: 600 }}
-            >
-              Entrar sem senha via WhatsApp
-            </Button>
-          )}
+
 
           {(mode === "magicLinkSent" || mode === "confirmationPending") && (
             <Box mt={2} p={2} style={{ backgroundColor: 'rgba(37, 211, 102, 0.1)', borderRadius: 12 }}>
