@@ -6,8 +6,8 @@ module.exports = {
     collate: "utf8mb4_bin"
   },
   pool: {
-    max: process.env.DB_MAX_CONNECTIONS || 15,
-    min: process.env.DB_MIN_CONNECTIONS || 2,
+    max: process.env.DB_MAX_CONNECTIONS || 5,
+    min: process.env.DB_MIN_CONNECTIONS || 1,
     acquire: process.env.DB_ACQUIRE || 30000,
     idle: process.env.DB_IDLE || 10000
   },
