@@ -151,7 +151,9 @@ export const initWASocket = async (
 
         if (!whatsappUpdate) return;
 
-        const { version, isLatest } = await fetchLatestWaWebVersion({ defaultVersion: waVersion }).catch(() => {
+        const { id, name, provider } = whatsappUpdate;
+
+        const { version, isLatest } = await fetchLatestWaWebVersion().catch(() => {
           return { version: waVersion, isLatest: false };
         });
 
