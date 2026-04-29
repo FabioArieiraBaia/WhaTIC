@@ -53,15 +53,11 @@ export const sendScheduledMessages = new Queue(
 async function handleSendMessage(job) {
   try {
     const { data } = job;
-
     const whatsapp = await Whatsapp.findByPk(data.whatsappId);
-
     if (whatsapp == null) {
       throw Error("Unidentified WhatsApp");
     }
-
     const messageData: MessageData = data.data;
-
     await SendMessage(whatsapp, messageData);
   } catch (e) {
     logger.error({ message: e?.message }, "MessageQueue -> SendMessage: error");
@@ -84,22 +80,13 @@ async function handleVerifySchedules() {
     });
     if (count > 0) {
       schedules.map(async schedule => {
-        await schedule.update({
-          status: "AGENDADA"
-        });
-        sendScheduledMessages.add(
-          "SendMessage",
-          { schedule },
-          { delay: 40000 }
-        );
+        await schedule.update({ status: "AGENDADA" });
+        sendScheduledMessages.add("SendMessage", { schedule }, { delay: 40000 });
         logger.info(`Delivery scheduled for: ${schedule.contact.name}`);
       });
     }
   } catch (e) {
-    logger.error(
-      { message: e?.message },
-      "SendScheduledMessage -> Verify: error"
-    );
+    logger.error({ message: e?.message }, "SendScheduledMessage -> Verify: error");
     throw e;
   }
 }
@@ -107,35 +94,24 @@ async function handleVerifySchedules() {
 async function handleExpireOutOfTicketMessages() {
   OutOfTicketMessage.destroy({
     where: {
-      createdAt: {
-        [Op.lt]: subDays(new Date(), 1)
-      }
+      createdAt: { [Op.lt]: subDays(new Date(), 1) }
     }
   });
 }
 
 async function handleSendScheduledMessage(job) {
   handleExpireOutOfTicketMessages();
-  const {
-    data: { schedule }
-  } = job;
+  const { data: { schedule } } = job;
   let scheduleRecord: Schedule | null = null;
-
   try {
     scheduleRecord = await Schedule.findByPk(schedule.id, {
-      include: [
-        { model: Contact, as: "contact" },
-        { model: User, as: "user" }
-      ]
+      include: [{ model: Contact, as: "contact" }, { model: User, as: "user" }]
     });
   } catch (e) {
     Sentry.captureException(e);
-    logger.info(`Erro ao tentar consultar agendamento: ${schedule.id}`);
   }
-
   try {
     const whatsapp = await GetDefaultWhatsApp(schedule.companyId);
-
     const message = await SendMessage(whatsapp, {
       number: schedule.contact.number,
       body: mustacheFormat({
@@ -144,459 +120,143 @@ async function handleSendScheduledMessage(job) {
         currentUser: schedule.user
       })
     });
-
     if (schedule.saveMessage) {
-      handleMessage(
-        message,
-        await GetWhatsappWbot(whatsapp),
-        schedule.companyId
-      );
+      handleMessage(message, await GetWhatsappWbot(whatsapp), schedule.companyId);
     }
-
-    await scheduleRecord?.update({
-      sentAt: new Date(),
-      status: "ENVIADA"
-    });
-
-    logger.info(`Scheduled message sent to: ${schedule.contact.name}`);
+    await scheduleRecord?.update({ sentAt: new Date(), status: "ENVIADA" });
     sendScheduledMessages.clean(15000, "completed");
   } catch (e) {
-    await scheduleRecord?.update({
-      status: "ERRO"
-    });
-    logger.error(
-      { message: e?.message },
-      "SendScheduledMessage -> SendMessage: error"
-    );
+    await scheduleRecord?.update({ status: "ERRO" });
+    logger.error({ message: e?.message }, "SendScheduledMessage -> SendMessage: error");
     throw e;
   }
 }
 
-export async function sleep(seconds: number) {
-  logger.info(
-    `Sleep ${seconds} seconds started: ${moment().format("HH:mm:ss")}`
-  );
-  return new Promise(resolve => {
-    setTimeout(() => {
-      logger.info(
-        `Sleep ${seconds} seconds completed: ${moment().format("HH:mm:ss")}`
-      );
-      resolve(true);
-    }, parseToMilliseconds(seconds));
-  });
-}
-
 async function setRatingExpired(tracking: TicketTraking, threshold: Date) {
-  await tracking.update({
-    expired: true
-  });
-
-  if (tracking.ratingAt < subMinutes(threshold, 5)) {
-    return;
-  }
-
+  await tracking.update({ expired: true });
+  if (tracking.ratingAt < subMinutes(threshold, 5)) return;
   const wbot = getWbot(tracking.whatsapp.id);
-
-  const complationMessage =
-    tracking.whatsapp.complationMessage.trim() ||
-    _t("Service completed", tracking.whatsapp);
-
+  const complationMessage = tracking.whatsapp.complationMessage.trim() || _t("Service completed", tracking.whatsapp);
   await wbot.sendMessage(getJidOf(tracking.ticket), {
     text: formatBody(`\u200e${complationMessage}`, tracking.ticket)
   });
-
-  logger.debug({ tracking }, "rating timedout");
 }
 
 async function handleRatingsTimeout() {
   const openTrackingRatings = await TicketTraking.findAll({
-    where: {
-      rated: false,
-      expired: false,
-      ratingAt: { [Op.not]: null }
-    },
-    include: [
-      {
-        model: Ticket,
-        include: [
-          {
-            model: Contact
-          },
-          {
-            model: User
-          },
-          {
-            model: QueueModel,
-            as: "queue"
-          }
-        ]
-      },
-      {
-        model: Whatsapp
-      }
-    ]
+    where: { rated: false, expired: false, ratingAt: { [Op.not]: null } },
+    include: [{ model: Ticket, include: [{ model: Contact }, { model: User }, { model: QueueModel, as: "queue" }] }, { model: Whatsapp }]
   });
-
-  const ratingThresholds = [];
   const currentTime = new Date();
-
-  // eslint-disable-next-line no-restricted-syntax
   for await (const tracking of openTrackingRatings) {
-    if (!ratingThresholds[tracking.companyId]) {
-      const timeout =
-        parseInt(
-          await GetCompanySetting(tracking.companyId, "ratingsTimeout", "5"),
-          10
-        ) || 5;
-
-      ratingThresholds[tracking.companyId] = subMinutes(currentTime, timeout);
-    }
-    if (tracking.ratingAt < ratingThresholds[tracking.companyId]) {
-      await setRatingExpired(tracking, ratingThresholds[tracking.companyId]);
+    const timeout = parseInt(await GetCompanySetting(tracking.companyId, "ratingsTimeout", "5"), 10) || 5;
+    const threshold = subMinutes(currentTime, timeout);
+    if (tracking.ratingAt < threshold) {
+      await setRatingExpired(tracking, threshold);
     }
   }
 }
 
-async function handleNoQueueTimeout(
-  company: Company,
-  timeout: number,
-  action: number
-) {
-  logger.trace(
-    {
-      timeout,
-      action,
-      companyId: company?.id
-    },
-    "handleNoQueueTimeout: entering"
-  );
-
+async function handleNoQueueTimeout(company: Company, timeout: number, action: number) {
   if (action) {
-    const queue = await QueueModel.findOne({
-      where: {
-        companyId: company.id,
-        id: action
-      }
-    });
-
+    const queue = await QueueModel.findOne({ where: { companyId: company.id, id: action } });
     if (!queue) {
-      const removed = await Setting.destroy({
-        where: {
-          companyId: company.id,
-          key: {
-            [Op.like]: "noQueueTimeout%"
-          }
-        }
-      });
-      logger.info(
-        { companyId: company.id, action, removed },
-        "handleNoQueueTimeout -> removed incorrect setting"
-      );
+      await Setting.destroy({ where: { companyId: company.id, key: { [Op.like]: "noQueueTimeout%" } } });
       return;
     }
   }
-
-  const groupsTab =
-    (await GetCompanySetting(company.id, "groupsTab", "disabled")) ===
-    "enabled";
-
   const where: WhereOptions<Ticket> = {
     status: "pending",
     companyId: company.id,
     queueId: null,
-    updatedAt: {
-      [Op.lt]: subMinutes(new Date(), timeout)
-    }
+    updatedAt: { [Op.lt]: subMinutes(new Date(), timeout) }
   };
-
-  if (groupsTab) {
-    where.isGroup = false;
-  }
-
   const tickets = await Ticket.findAll({ where });
-
-  logger.debug(
-    { expiredCount: tickets.length },
-    "handleNoQueueTimeout -> tickets"
-  );
-
-  const status = action ? "pending" : "closed";
-  const queueId = action || null;
-
-  // eslint-disable-next-line no-restricted-syntax
   for (const ticket of tickets) {
-    logger.trace(
-      { ticket: ticket.id, userId: ticket.userId, status, queueId },
-      "handleNoQueueTimeout -> UpdateTicketService"
-    );
+    const status = action ? "pending" : "closed";
+    const queueId = action || null;
     const userId = status === "pending" ? null : ticket.userId;
-    // eslint-disable-next-line no-await-in-loop
-    await UpdateTicketService({
-      ticketId: ticket.id,
-      ticketData: { status, userId, queueId },
-      companyId: company.id
-    });
+    await UpdateTicketService({ ticketId: ticket.id, ticketData: { status, userId, queueId }, companyId: company.id });
   }
-
-  logger.trace(
-    {
-      timeout,
-      action,
-      companyId: company?.id
-    },
-    "handleNoQueueTimeout: exiting"
-  );
 }
 
-async function handleChatbotTicketTimeout(
-  company: Company,
-  timeout: number,
-  action: number
-) {
-  logger.trace(
-    {
-      timeout,
-      action,
-      companyId: company?.id
-    },
-    "handleChatbotTicketTimeout: entering"
-  );
-
+async function handleChatbotTicketTimeout(company: Company, timeout: number, action: number) {
   if (action) {
-    const queue = await QueueModel.findOne({
-      where: {
-        companyId: company.id,
-        id: action
-      }
-    });
-
+    const queue = await QueueModel.findOne({ where: { companyId: company.id, id: action } });
     if (!queue) {
-      const removed = await Setting.destroy({
-        where: {
-          companyId: company.id,
-          key: {
-            [Op.like]: "chatbotTicketTimeout%"
-          }
-        }
-      });
-      logger.info(
-        { companyId: company.id, action, removed },
-        "handleChatbotTicketTimeout -> removed incorrect setting"
-      );
+      await Setting.destroy({ where: { companyId: company.id, key: { [Op.like]: "chatbotTicketTimeout%" } } });
       return;
     }
   }
-
   const where: WhereOptions<Ticket> = {
     status: "pending",
     companyId: company.id,
     isGroup: false,
     chatbot: true,
-    updatedAt: {
-      [Op.lt]: subMinutes(new Date(), timeout)
-    }
+    updatedAt: { [Op.lt]: subMinutes(new Date(), timeout) }
   };
-
-  if (action) {
-    where.queueId = {
-      [Op.or]: [{ [Op.ne]: action }, { [Op.is]: null }]
-    };
-  }
-
   const tickets = await Ticket.findAll({ where });
-
-  logger.debug(
-    { expiredCount: tickets.length },
-    "handleChatbotTicketTimeout -> tickets"
-  );
-
-  const ticketData: any = {
-    status: action ? "pending" : "closed"
-  };
-
-  if (action) {
-    ticketData.queueId = action;
-  }
-
-  // eslint-disable-next-line no-restricted-syntax
   for (const ticket of tickets) {
-    logger.trace(
-      { ...ticketData },
-      "handleChatbotTicketTimeout -> UpdateTicketService"
-    );
-    // eslint-disable-next-line no-await-in-loop
-    await UpdateTicketService({
-      ticketId: ticket.id,
-      ticketData,
-      companyId: company.id
-    });
+    const status = action ? "pending" : "closed";
+    const queueId = action || null;
+    await UpdateTicketService({ ticketId: ticket.id, ticketData: { status, queueId }, companyId: company.id });
   }
-
-  logger.trace(
-    {
-      timeout,
-      action,
-      companyId: company?.id
-    },
-    "handleChatbotTicketTimeout: exiting"
-  );
 }
 
-async function handleOpenTicketTimeout(
-  company: Company,
-  timeout: number,
-  status: string
-) {
-  logger.trace(
-    {
-      timeout,
-      status,
-      companyId: company?.id
-    },
-    "handleOpenTicketTimeout"
-  );
+async function handleOpenTicketTimeout(company: Company, timeout: number, status: string) {
   const tickets = await Ticket.findAll({
-    where: {
-      status: "open",
-      companyId: company.id,
-      updatedAt: {
-        [Op.lt]: subMinutes(new Date(), timeout)
-      }
-    }
+    where: { status: "open", companyId: company.id, updatedAt: { [Op.lt]: subMinutes(new Date(), timeout) } }
   });
-
-  // eslint-disable-next-line no-restricted-syntax
   for (const ticket of tickets) {
-    // eslint-disable-next-line no-await-in-loop
     await UpdateTicketService({
       ticketId: ticket.id,
-      ticketData: {
-        status,
-        queueId: ticket.queueId,
-        userId: status !== "pending" ? ticket.userId : null
-      },
+      ticketData: { status, queueId: ticket.queueId, userId: status !== "pending" ? ticket.userId : null },
       companyId: company.id
     });
   }
 }
 
 async function handleTicketTimeouts() {
-  logger.trace("handleTicketTimeouts");
   const companies = await Company.findAll();
-
-  // eslint-disable-next-line no-restricted-syntax
   for (const company of companies) {
-    logger.trace({ companyId: company?.id }, "handleTicketTimeouts -> company");
-    const noQueueTimeout = Number(
-      // eslint-disable-next-line no-await-in-loop
-      await GetCompanySetting(company.id, "noQueueTimeout", "0")
-    );
+    const noQueueTimeout = Number(await GetCompanySetting(company.id, "noQueueTimeout", "0"));
     if (noQueueTimeout) {
-      const noQueueTimeoutAction = Number(
-        // eslint-disable-next-line no-await-in-loop
-        await GetCompanySetting(company.id, "noQueueTimeoutAction", "0")
-      );
-      // eslint-disable-next-line no-await-in-loop
-      await handleNoQueueTimeout(
-        company,
-        noQueueTimeout,
-        noQueueTimeoutAction || 0
-      );
+      const noQueueTimeoutAction = Number(await GetCompanySetting(company.id, "noQueueTimeoutAction", "0"));
+      await handleNoQueueTimeout(company, noQueueTimeout, noQueueTimeoutAction || 0);
     }
-    const openTicketTimeout = Number(
-      // eslint-disable-next-line no-await-in-loop
-      await GetCompanySetting(company.id, "openTicketTimeout", "0")
-    );
+    const openTicketTimeout = Number(await GetCompanySetting(company.id, "openTicketTimeout", "0"));
     if (openTicketTimeout) {
-      // eslint-disable-next-line no-await-in-loop
-      const openTicketTimeoutAction = await GetCompanySetting(
-        company.id,
-        "openTicketTimeoutAction",
-        "pending"
-      );
-      // eslint-disable-next-line no-await-in-loop
-      await handleOpenTicketTimeout(
-        company,
-        openTicketTimeout,
-        openTicketTimeoutAction
-      );
+      const openTicketTimeoutAction = await GetCompanySetting(company.id, "openTicketTimeoutAction", "pending");
+      await handleOpenTicketTimeout(company, openTicketTimeout, openTicketTimeoutAction);
     }
-    const chatbotTicketTimeout = Number(
-      // eslint-disable-next-line no-await-in-loop
-      await GetCompanySetting(company.id, "chatbotTicketTimeout", "0")
-    );
+    const chatbotTicketTimeout = Number(await GetCompanySetting(company.id, "chatbotTicketTimeout", "0"));
     if (chatbotTicketTimeout) {
-      const chatbotTicketTimeoutAction =
-        Number(
-          // eslint-disable-next-line no-await-in-loop
-          await GetCompanySetting(company.id, "chatbotTicketTimeoutAction", "0")
-        ) || 0;
-      // eslint-disable-next-line no-await-in-loop
-      await handleChatbotTicketTimeout(
-        company,
-        chatbotTicketTimeout,
-        chatbotTicketTimeoutAction
-      );
+      const chatbotTicketTimeoutAction = Number(await GetCompanySetting(company.id, "chatbotTicketTimeoutAction", "0")) || 0;
+      await handleChatbotTicketTimeout(company, chatbotTicketTimeout, chatbotTicketTimeoutAction);
     }
   }
 }
 
 async function handleEveryMinute(job: Job) {
-  const now = Date.now();
-  const delay = now - ((job.opts as any).prevMillis || now);
-
-  // only start jobs that are up to 10s after its scheduled time
-  if (delay > 10 * 1000) {
-    logger.warn(
-      `handleEveryMinute: job skipped due to delay - delay: ${delay}ms`
-    );
-    return;
-  }
-
   const executionId = makeRandomId(10);
-  logger.trace(`handleEveryMinute: entering - executionId: ${executionId}`);
   try {
     await handleRatingsTimeout();
     await handleTicketTimeouts();
-    logger.trace(`handleEveryMinute: exiting - executionId: ${executionId}`);
   } catch (e) {
-    logger.error(
-      { message: e?.message },
-      `handleEveryMinute: error received - executionId: ${executionId}`
-    );
+    logger.error({ message: e?.message }, `handleEveryMinute: error - ${executionId}`);
   }
 }
 
 export async function startQueueProcess() {
   logger.info("Starting queue processing");
 
-  startCampaignQueues().then(() => {
-    logger.info("Campaign processing functions started");
-  });
-
   messageQueue.process("SendMessage", handleSendMessage);
-
   scheduleMonitor.process("Verify", handleVerifySchedules);
-
   sendScheduledMessages.process("SendMessage", handleSendScheduledMessage);
-
   userMonitor.process("EveryMinute", handleEveryMinute);
 
-  scheduleMonitor.add(
-    "Verify",
-    {},
-    {
-      repeat: { cron: "*/30 * * * * *" },
-      removeOnComplete: true
-    }
-  );
-
-  userMonitor.add(
-    "EveryMinute",
-    {},
-    {
-      repeat: { cron: "* * * * *" },
-      removeOnComplete: true
-    }
-  );
+  userMonitor.add("EveryMinute", {}, {
+    repeat: { cron: "0 0 * * *" },
+    removeOnComplete: true
+  });
 }

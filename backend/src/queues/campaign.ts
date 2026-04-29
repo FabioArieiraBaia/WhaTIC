@@ -507,6 +507,7 @@ export async function startCampaignQueues() {
   campaignQueue.process("DispatchCampaign", handleDispatchCampaign);
   campaignQueue.process("DispatchConfirmedCampaign", handleDispatchCampaign);
 
+  /*
   campaignQueue.add(
     "VerifyCampaignsDatabase",
     {},
@@ -515,4 +516,5 @@ export async function startCampaignQueues() {
       removeOnComplete: true
     }
   );
+  */
 }
