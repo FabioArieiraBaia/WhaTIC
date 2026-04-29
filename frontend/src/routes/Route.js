@@ -16,7 +16,7 @@ const Route = ({ component: Component, isPrivate = false, ...rest }) => {
 		);
 	}
 
-	if (isAuth && !isPrivate) {
+	if (isAuth && !isPrivate && !rest.path.startsWith('/portal')) {
 		return (
 			<>
 				{loading && <BackdropLoading />}
