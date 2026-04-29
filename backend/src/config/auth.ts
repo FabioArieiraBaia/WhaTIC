@@ -35,9 +35,9 @@ async function generateSecretIfNotExists(cacheKey: string): Promise<string> {
 }
 
 const jwtConfig: JwtConfig = {
-  secret: process.env.JWT_SECRET || "ticketz_secret",
+  secret: process.env.JWT_SECRET || "IRIS_PRODUCOES_2026_ULTRA_STABLE_SECRET_KEY_9988",
   expiresIn: "1d",
-  refreshSecret: process.env.JWT_REFRESH_SECRET || "ticketz_refresh_secret",
+  refreshSecret: process.env.JWT_REFRESH_SECRET || "IRIS_PRODUCOES_REFRESH_SECRET_KEY_9988",
   refreshExpiresIn: "7d"
 };
 

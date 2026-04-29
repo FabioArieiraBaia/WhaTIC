@@ -50,7 +50,13 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
         resetPassword: decoded.action === "magic-link" 
       });
     } catch (err) {
-      throw new AppError("Link de acesso expirado ou inválido", 401);
+      console.error("[Portal Login Error]", err);
+      if (err.name === 'TokenExpiredError') {
+        throw new AppError("Link de acesso expirado. Por favor, solicite um novo.", 401);
+      } else if (err.name === 'JsonWebTokenError') {
+        throw new AppError("Link de acesso inválido ou corrompido.", 401);
+      }
+      throw new AppError(err.message || "Erro na validação do link", 401);
     }
   }
 
