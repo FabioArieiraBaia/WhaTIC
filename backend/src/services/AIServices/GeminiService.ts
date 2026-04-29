@@ -9,8 +9,7 @@ export const GeminiService = async (
   ticketId: number,
   companyId: number,
   userMessage: string,
-  history: any[] = [],
-  mediaData: any = null
+  history: any[] = []
 ): Promise<string> => {
   const settings = await Setting.findAll({ where: { companyId } });
   const geminiKey = settings.find(s => s.key === "geminiApiKey")?.value || "";
@@ -20,7 +19,7 @@ export const GeminiService = async (
     return "Desculpe, meu sistema de inteligência está temporariamente indisponível (chave ausente no painel).";
   }
 
-  const aiAgentModel = settings.find(s => s.key === "aiAgentModel")?.value || "gemini-2.5-flash";
+  const aiAgentModel = settings.find(s => s.key === "aiAgentModel")?.value || "gemini-1.5-pro";
   const genAI = new GoogleGenerativeAI(geminiKey);
   const model = genAI.getGenerativeModel({ model: aiAgentModel });
 
@@ -80,18 +79,8 @@ Mensagem Atual do Cliente: ${userMessage}
 Responda como o assistente virtual seguindo o system prompt:
 `;
 
-  const parts: any[] = [systemPrompt, prompt];
-
-  if (mediaData && mediaData.base64 && mediaData.mimeType) {
-    parts.push({
-      inlineData: {
-        data: mediaData.base64,
-        mimeType: mediaData.mimeType
-      }
-    });
-  }
-
-  const result = await model.generateContent(parts);
+  const result = await model.generateContent([systemPrompt, prompt]);
   const response = await result.response;
   return response.text();
 };
+  
