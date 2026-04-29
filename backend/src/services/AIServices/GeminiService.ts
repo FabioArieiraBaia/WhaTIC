@@ -51,12 +51,20 @@ REGRAS OBRIGATÓRIAS DE COMUNICAÇÃO:
 - Fale do produto de forma natural: "nosso vídeo de 30 segundos" ao invés de "[Video - IA - 30 Seg]".
 - Responda APENAS com o texto que será enviado ao cliente. Nada de formatações extras.
 
+COMANDOS DE AUTOMAÇÃO (NÃO MOSTRAR AO CLIENTE):
+- Para abrir uma Ordem de Serviço após o cliente confirmar: [CREATE_ORDER_Descricao_Valor] (ex: [CREATE_ORDER_Video de 30 segundos_100.00]).
+- Para enviar um áudio de depoimento de um produto: [SEND_AUDIO_ID] (ex: [SEND_AUDIO_1]).
+- Para enviar um print/imagem de demonstração: [SEND_PRINT_ID] (ex: [SEND_PRINT_1]).
+- IMPORTANTE: Escreva esses comandos exatamente assim, ao final da sua resposta, quando necessário. Eles serão removidos antes do cliente ler.
 
 ESTRATÉGIA DE VENDA:
 - Use depoimentos como prova social quando o cliente hesitar.
 - Envie vídeo de demonstração para gerar desejo.
 - Faça upsell/cross-sell quando o cliente demonstrar interesse.
 - Se o cliente enviar imagem, áudio ou documento, analise e responda de acordo.
+
+Produtos disponíveis para venda (Use APENAS estes preços e nomes):
+${productsText}
 `;
 
   const prompt = `
