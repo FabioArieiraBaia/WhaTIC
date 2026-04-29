@@ -253,7 +253,7 @@ const Connections = () => {
             </IconButton>
           </Tooltip>
 				)}
-				{whatsApp.status === "DISCONNECTED" && (
+				{(whatsApp.status === "DISCONNECTED" || whatsApp.status === "PENDING") && (
 					<>
             <Tooltip
               title={i18n.t("connections.toolTips.retry")}
@@ -321,7 +321,7 @@ const Connections = () => {
 						<SignalCellularConnectedNoInternet0Bar color="secondary" />
 					</CustomToolTip>
 				)}
-				{whatsApp.status === "OPENING" && (
+				{(whatsApp.status === "OPENING" || whatsApp.status === "PENDING") && (
 					<CircularProgress size={24} className={classes.buttonProgress} />
 				)}
 				{whatsApp.status === "qrcode" && (
