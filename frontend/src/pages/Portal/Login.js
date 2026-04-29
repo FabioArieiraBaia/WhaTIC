@@ -21,6 +21,30 @@ const PortalLogin = () => {
   const [loading, setLoading] = useState(false);
   const history = useHistory();
 
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+
+    if (token) {
+      const loginViaToken = async () => {
+        setLoading(true);
+        try {
+          const { data } = await api.post("/portal/login", { token });
+          const contactData = data.contact || data.serializedContact;
+          localStorage.setItem("portal_client", JSON.stringify(contactData));
+          localStorage.setItem("token", JSON.stringify(data.token));
+          toast.success(`Bem-vindo, ${contactData.name}!`);
+          history.push("/portal/orders");
+        } catch (err) {
+          toast.error("Link expirado ou inválido. Peça um novo.");
+        } finally {
+          setLoading(false);
+        }
+      };
+      loginViaToken();
+    }
+  }, [history]);
+
   const countries = [
     { code: "55", flag: "🇧🇷", name: "Brasil" },
     { code: "1", flag: "🇺🇸", name: "EUA" },
