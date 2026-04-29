@@ -86,11 +86,8 @@ const PortalLogin = () => {
     const fullNumber = countryCode + number.replace(/\D/g, "");
 
     if (mode === "login") {
-      const res = await handleLogin({ number: fullNumber, password });
-      if (res?.firstAccess) {
-        setContactId(res.contactId);
-        setMode("firstAccess");
-      }
+      await handleRequestMagicLink();
+      return;
     } else if (mode === "firstAccess") {
       if (password !== confirmPassword) {
         toast.error("As senhas não coincidem");
@@ -193,38 +190,17 @@ const PortalLogin = () => {
                 </Box>
               )}
 
-
-
-              {mode === "firstAccess" && (
-                <Box className="input-glass-container" mt={2}>
-                  <TextField
-                    variant="standard"
-                    fullWidth
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Repita a Senha"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    InputProps={{
-                      disableUnderline: true,
-                      style: { color: 'white' }
-                    }}
-                  />
-                </Box>
-              )}
-
-
-
               <Button
                 className="premium-button"
                 fullWidth
-                onClick={mode === "login" ? handleRequestMagicLink : handleAuth}
+                type="submit"
                 disabled={authLoading || localLoading}
                 style={{ height: 50, marginTop: 30 }}
               >
                 {authLoading || localLoading ? (
                   <CircularProgress size={24} color="inherit" />
                 ) : (
-                  mode === "firstAccess" ? "Salvar e Confirmar no WhatsApp" : "RECEBER LINK NO WHATSAPP"
+                  "RECEBER LINK NO WHATSAPP"
                 )}
               </Button>
             </form>
